@@ -25,63 +25,137 @@ const baseCopy = {
 		callout: "Don't you want\nto know more",
 		body:
 			'I am <i>Carodak</i>, a computer scientist by training (M.Sc.), and a writer and designer in my spare time. Computer science gives structure to my thinking, writing opens it up, and design lets me bring the two together to create technology projects that can have a tangible impact on people’s well-being.',
-		link: 'About >',
+		link: 'About',
 	},
 	projects: {
 		label: 'Recent favorite\ncreations!',
 		heading: 'Projects',
 		cardCta: 'Case study',
+		filters: ['Featured', 'Web', 'XR', 'Fun&Games', 'AI', 'Experimental Tasks', 'Data Visualization'],
 		items: [
 			{
-				slug: 'flexd',
+				slug: 'developing-e-cog-learning-platform',
 				featuredPosition: 1,
+				categories: ['Featured', 'Web'],
 				year: '2026',
-				title: 'E-Cog Learning Platform For Healthcare Professionals',
+				title: 'E-Cog Learning Platform for Healthcare Professionals',
 				description:
-					'I explored the visual and product direction for Flex-d, a social fitness app built around supportive, movement-driven interactions across 50+ screens.',
-				discipline: 'Visual design',
-				role: 'Product concept',
-				timeline: '4 weeks',
+					'An online training platform designed to train healthcare professionals in two mental health programs across multiple Canadian research sites.',
+				discipline: 'Web',
+				role: 'Lead developer',
+				timeline: '2020-2026',
 				visual: {
-					title: 'Flex-d',
+					title: 'E-Cog',
 					theme: 'dark',
-					tags: ['track result', 'check in', 'streak of 20 days', 'high five'],
+					tags: ['online training', 'healthcare', 'SCORM', 'research'],
 					media: [
-						{ type: 'mockup', label: 'Product dashboard' },
-						{ type: 'mockup', label: 'Social feed' },
-						{ type: 'mockup', label: 'Progress view' },
+						{ type: 'image', label: 'E-Cog: Front page, https://e-cog.ca (2026-04-20)', src: '/projects/ecog/ecog-fronpage.png' },
+						{ type: 'image', label: 'E-Cog: Pages I developed, figure taken from https://pmc.ncbi.nlm.nih.gov/articles/PMC12535630/', src: '/projects/ecog/ecog-pages.png' },
+						{ type: 'image', label: 'E-Cog: Wireframes I developed', src: '/projects/ecog/ecog-wireframes.png' },
+						{
+							type: 'image',
+							label: 'E-Cog: example of database schema I designed with my colleague Alexandre Caron',
+							src: '/projects/ecog/ecog-db-schemas-supervision.png',
+						},
 					],
 				},
 				caseStudy: {
-					kicker: 'Visual Concept Design / Product Thinking',
-					heroTitle: 'Lead Developing the E-Cog Learning Platform for .',
+					kicker: 'Web Development / Online Training / Research Platform',
+					heroTitle: 'Leading the Development of E-Cog, an Online Platform to Train Healthcare Professionals',
 					heroSubtitle:
-						'A product concept exploring motivation, accountability, and friendly movement rituals.',
+						'E-Cog is an online training platform designed to train healthcare professionals in two mental health programs, developed as part of a research project across multiple sites in Canada.',
 					overview: [
-						{ label: 'Discipline', value: 'Visual design, product strategy' },
-						{ label: 'My Role', value: 'Product designer, concept owner' },
-						{ label: 'Timeline', value: '4 weeks' },
+						{
+							label: 'My Role',
+							value:
+								'I was mostly the lead developer, but also contributed from early concept to implementation, including needs analysis, wireframing, user testing, course content creation, and <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12535630/" target="_blank">scientific paper writing</a>.',
+						},
+						{
+							label: 'Technical Details',
+							value:
+								'WordPress CMS, LearnDash LMS, PHP, JavaScript, HTML, CSS.',
+						},
+						{
+							label: 'Timeline',
+							value:
+								'2020-2026, including platform development, evaluation, and deployment across multiple Canadian sites.',
+						},
 					],
-					darkTitle: 'High-engagement social training starts with low-friction support.',
-					darkBody:
-						'I designed a concept that makes personal progress visible while keeping the experience light enough to return to every day. The MVP focused on friendly accountability, habit loops, and quick reflection moments.',
-					processTitle: 'What the project looked like',
-					processBody:
-						'The work moved from rough flows to interface explorations, then into a compact product story that could explain the idea quickly.',
-					cards: [
-						{ title: 'Defined', body: 'Mapped the core user loop and the emotional promise of the product.' },
-						{ title: 'Designed', body: 'Created visual systems, screen patterns, and interaction moments.' },
-						{ title: 'Packaged', body: 'Turned the concept into a case study narrative and MVP direction.' },
+					problem: {
+						title: 'Healthcare professionals had limited access to online training for these two mental health programs.',
+						description:
+							'These trainings were mostly delivered in person, often in research contexts, which made them harder to scale and less visible outside specialized networks.',
+						points: [
+							'Training was mostly delivered in person or inside research contexts.',
+							'That made the programs harder to scale and less visible outside specialized networks.',
+						],
+					},
+					solution: {
+						title: 'I built an asynchronous platform to make the programs accessible worldwide.',
+						description:
+							'Users can log in, follow their assigned training programs, and progress through interactive course content at their own pace. Four decisions shaped the platform: following the ADDIE framework across development phases; choosing an easy-to-maintain web stack for a small team; using a flexible self-hosted architecture for customization, updates, and maintenance; designing interactive SCORM-based training slides and course content; and building admin controls so non-technical colleagues could adjust basic content without developer support.',
+						points: [
+							'Users log in, follow assigned training programs, and progress at their own pace.',
+							'The platform uses a maintainable WordPress/LearnDash stack with SCORM-based interactive course content.',
+							'I kept it self-hosted, flexible, and ensured that new features were editable through the admin panel for non-technical collaborators.',
+						],
+					},
+					process: [
+						{
+							title: 'Process',
+							body:
+								'I interviewed researchers and analyzed their functional needs. The main challenge was turning very specific research requirements into a flexible architecture that could evolve over time.',
+						},
+						{
+							title: 'Process',
+							body:
+								'I defined the system architecture: technology stack, server setup, hosting, database, and overall system structure. The final stack included WordPress CMS, LearnDash LMS, other WordPress plugins, PHP, and JavaScript.',
+						},
+						{
+							title: 'Process',
+							body:
+								'At one point, we had to change LMS because the previous system was outside our control and often unstable. I identified a new LMS and migrated the platform to a self-hosted setup.',
+						},
+						{
+							title: 'Process',
+							body:
+								'I worked on system design, including database schemas, system interfaces, APIs, and class diagrams, while following practices that kept the platform scalable and easy to maintain.',
+						},
+						{
+							title: 'Process',
+							body:
+								'I designed the UX flows and page mockups, then led platform development across the frontend in HTML, CSS, and JavaScript, and the backend in PHP.',
+						},
 					],
-					results: [
-						{ value: '50+', label: 'screens explored' },
-						{ value: '4 weeks', label: 'from concept to case study' },
+					challenges: [],
+					impact: [
+						{
+							title: '74+',
+							description:
+								'healthcare professionals registered on the platform, showing successful uptake during the project.',
+						},
+						{
+							title: '6/6',
+							description:
+								'credibility and trustworthiness score from tester research colleagues for the information provided.',
+						},
+						{
+							title: '88%',
+							description:
+								'of these testing users would recommend the training program to others, and 100% would return to complete further trainings.',
+						},
+						{
+							title: 'Outreach',
+							description:
+								'contribution to open science with a <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12535630/" target="_blank">paper documenting our complete process</a>.',
+						},
 					],
 				},
 			},
 			{
 				slug: 'douglas-tools',
 				featuredPosition: 2,
+				categories: ['Featured', 'Web', 'Data Visualization'],
 				year: '2025',
 				title: 'Clinical Tools - Internal Systems',
 				description:
@@ -104,30 +178,37 @@ const baseCopy = {
 					heroTitle: 'Building practical tools for research and clinical workflows.',
 					heroSubtitle: 'A systems-focused project centered on clarity, maintainability, and daily use.',
 					overview: [
-						{ label: 'Discipline', value: 'Software development' },
 						{ label: 'My Role', value: 'Developer' },
 						{ label: 'Timeline', value: 'Ongoing' },
 					],
-					darkTitle: 'Good internal tools reduce friction where it matters most.',
-					darkBody:
-						'I worked on interfaces and workflows that help teams move through complex information with fewer interruptions and clearer states.',
-					processTitle: 'What the project looked like',
-					processBody:
-						'The process emphasized small, reliable improvements: clarifying requirements, shipping usable pieces, and refining with feedback.',
-					cards: [
-						{ title: 'Clarified', body: 'Translated operational needs into focused interface behavior.' },
-						{ title: 'Built', body: 'Implemented stable views and flows for everyday use.' },
-						{ title: 'Refined', body: 'Adjusted edge cases and usability details with team feedback.' },
+					problem: {
+						title: 'Good internal tools reduce friction where it matters most.',
+						description:
+							'I worked on interfaces and workflows that help teams move through complex information with fewer interruptions and clearer states.',
+					},
+					solution: {
+						title: 'What the project looked like',
+						description:
+							'The process emphasized small, reliable improvements: clarifying requirements, shipping usable pieces, and refining with feedback.',
+					},
+					process: [
+						{
+							title: 'Process',
+							body:
+								'The process emphasized small, reliable improvements: clarifying requirements, shipping usable pieces, and refining with feedback.',
+						},
 					],
-					results: [
-						{ value: 'ongoing', label: 'support and iteration' },
-						{ value: 'team use', label: 'built for real workflows' },
+					challenges: [],
+					impact: [
+						{ title: 'ongoing', description: 'support and iteration' },
+						{ title: 'team use', description: 'built for real workflows' },
 					],
 				},
 			},
 			{
 				slug: 'vr-research',
 				featuredPosition: 3,
+				categories: ['Featured', 'XR', 'AI', 'Experimental Tasks'],
 				year: '2020',
 				title: 'VR Research Prototype',
 				description:
@@ -150,30 +231,37 @@ const baseCopy = {
 					heroTitle: 'Exploring how immersive interactions can support research questions.',
 					heroSubtitle: 'A prototype built at the intersection of software, experimentation, and experience.',
 					overview: [
-						{ label: 'Discipline', value: 'VR prototyping' },
 						{ label: 'My Role', value: 'Developer, researcher' },
 						{ label: 'Timeline', value: 'Academic project' },
 					],
-					darkTitle: 'Research prototypes need to be clear enough to test, not perfect enough to ship.',
-					darkBody:
-						'I focused on building usable interaction paths that could help answer the research question while keeping the prototype adaptable.',
-					processTitle: 'What the project looked like',
-					processBody:
-						'The work combined technical exploration, interaction design, and iteration around what could be observed and measured.',
-					cards: [
-						{ title: 'Framed', body: 'Defined the interaction goals and research constraints.' },
-						{ title: 'Prototyped', body: 'Built VR interaction flows for exploration and testing.' },
-						{ title: 'Observed', body: 'Used feedback to refine interaction clarity.' },
+					problem: {
+						title: 'Research prototypes need to be clear enough to test, not perfect enough to ship.',
+						description:
+							'I focused on building usable interaction paths that could help answer the research question while keeping the prototype adaptable.',
+					},
+					solution: {
+						title: 'What the project looked like',
+						description:
+							'The work combined technical exploration, interaction design, and iteration around what could be observed and measured.',
+					},
+					process: [
+						{
+							title: 'Process',
+							body:
+								'The work combined technical exploration, interaction design, and iteration around what could be observed and measured.',
+						},
 					],
-					results: [
-						{ value: 'VR', label: 'immersive prototype' },
-						{ value: 'AI', label: 'research context' },
+					challenges: [],
+					impact: [
+						{ title: 'VR', description: 'immersive prototype' },
+						{ title: 'AI', description: 'research context' },
 					],
 				},
 			},
 			{
 				slug: 'writing-systems',
 				featuredPosition: 4,
+				categories: ['Featured', 'Fun&Games', 'Experimental Tasks'],
 				year: '2024',
 				title: 'Writing Systems - Narrative Tools',
 				description:
@@ -196,30 +284,37 @@ const baseCopy = {
 					heroTitle: 'Turning narrative fragments into reflective systems.',
 					heroSubtitle: 'A personal project about writing as a way to organize thought and emotion.',
 					overview: [
-						{ label: 'Discipline', value: 'Writing, narrative systems' },
 						{ label: 'My Role', value: 'Writer' },
 						{ label: 'Timeline', value: 'Personal' },
 					],
-					darkTitle: 'Stories can become tools for noticing what is hard to name directly.',
-					darkBody:
-						'I explored structures that make writing feel less like a blank page and more like a usable system for reflection.',
-					processTitle: 'What the project looked like',
-					processBody:
-						'The work moved between fragments, prompts, recurring motifs, and small systems for developing ideas over time.',
-					cards: [
-						{ title: 'Collected', body: 'Built a library of fragments, themes, and recurring questions.' },
-						{ title: 'Structured', body: 'Organized writing into repeatable formats.' },
-						{ title: 'Reworked', body: 'Edited drafts for rhythm, clarity, and emotional shape.' },
+					problem: {
+						title: 'Stories can become tools for noticing what is hard to name directly.',
+						description:
+							'I explored structures that make writing feel less like a blank page and more like a usable system for reflection.',
+					},
+					solution: {
+						title: 'What the project looked like',
+						description:
+							'The work moved between fragments, prompts, recurring motifs, and small systems for developing ideas over time.',
+					},
+					process: [
+						{
+							title: 'Process',
+							body:
+								'The work moved between fragments, prompts, recurring motifs, and small systems for developing ideas over time.',
+						},
 					],
-					results: [
-						{ value: 'daily', label: 'creative practice' },
-						{ value: 'systems', label: 'for reflection' },
+					challenges: [],
+					impact: [
+						{ title: 'daily', description: 'creative practice' },
+						{ title: 'systems', description: 'for reflection' },
 					],
 				},
 			},
 			{
 				slug: 'portfolio-system',
 				featuredPosition: 5,
+				categories: ['Featured', 'Web'],
 				year: '2026',
 				title: 'Portfolio System',
 				description:
@@ -242,24 +337,30 @@ const baseCopy = {
 					heroTitle: 'Designing a portfolio that behaves like a small world.',
 					heroSubtitle: 'A static Astro site with featured work, hidden quests, and editable content.',
 					overview: [
-						{ label: 'Discipline', value: 'Frontend, visual design' },
 						{ label: 'My Role', value: 'Designer, developer' },
 						{ label: 'Timeline', value: 'Iterative' },
 					],
-					darkTitle: 'A portfolio can be more than a list of links.',
-					darkBody:
-						'I designed the site as a quiet navigation system with chapters, hidden pages, and case studies that can grow over time.',
-					processTitle: 'What the project looked like',
-					processBody:
-						'The implementation favors clean Astro components, simple data files, and CSS-driven visuals that work on GitHub Pages.',
-					cards: [
-						{ title: 'Structured', body: 'Centralized content for easier editing and translation.' },
-						{ title: 'Designed', body: 'Matched a sparse editorial mockup with custom CSS.' },
-						{ title: 'Shipped', body: 'Kept the build static and dependency-light.' },
+					problem: {
+						title: 'A portfolio can be more than a list of links.',
+						description:
+							'I designed the site as a quiet navigation system with chapters, hidden pages, and case studies that can grow over time.',
+					},
+					solution: {
+						title: 'What the project looked like',
+						description:
+							'The implementation favors clean Astro components, simple data files, and CSS-driven visuals that work on GitHub Pages.',
+					},
+					process: [
+						{
+							title: 'Process',
+							body:
+								'The implementation favors clean Astro components, simple data files, and CSS-driven visuals that work on GitHub Pages.',
+						},
 					],
-					results: [
-						{ value: '8+', label: 'static routes' },
-						{ value: '0', label: 'extra runtime dependencies' },
+					challenges: [],
+					impact: [
+						{ title: '8+', description: 'static routes' },
+						{ title: '0', description: 'extra runtime dependencies' },
 					],
 				},
 			},
@@ -298,7 +399,7 @@ const baseCopy = {
 				'This page is ready for experiments, games, side quests, and creative sketches.',
 		},
 		project: {
-			back: '<- Back to projects',
+			back: 'Back to projects',
 			nextMockup:
 				'Project detail placeholder. Send the second mockup and this page can become the full case study layout.',
 		},

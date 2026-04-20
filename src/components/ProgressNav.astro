@@ -47,8 +47,19 @@ const sectionHref = (id: string) => {
 		});
 	};
 
-	const clearAtPageTop = () => {
-		if (window.scrollY < 80) setActive(null);
+	const updateActiveSection = () => {
+		if (window.scrollY < 80) {
+			setActive(null);
+			return;
+		}
+
+		const markerY = window.innerHeight * 0.38;
+		const activeSection = sections.find((section) => {
+			const rect = section.getBoundingClientRect();
+			return rect.top <= markerY && rect.bottom >= markerY;
+		});
+
+		if (activeSection) setActive(activeSection.id);
 	};
 
 	const observer = new IntersectionObserver(
@@ -57,12 +68,13 @@ const sectionHref = (id: string) => {
 				.filter((entry) => entry.isIntersecting)
 				.sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
 
-			if (visible && window.scrollY >= 80) setActive(visible.target.id);
+			if (visible) updateActiveSection();
 		},
 		{ rootMargin: '-35% 0px -45% 0px', threshold: [0.12, 0.35, 0.6] },
 	);
 
 	sections.forEach((section) => observer.observe(section));
-	clearAtPageTop();
-	window.addEventListener('scroll', clearAtPageTop, { passive: true });
+	updateActiveSection();
+	window.addEventListener('scroll', updateActiveSection, { passive: true });
+	window.addEventListener('resize', updateActiveSection);
 </script>

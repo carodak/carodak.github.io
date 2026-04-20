@@ -9,147 +9,283 @@ interface Props {
 }
 
 const { language, copy, project } = Astro.props;
-const caseStudy = project.caseStudy ?? {
-	kicker: project.discipline,
-	heroTitle: project.title,
-	heroSubtitle: project.description,
-	overview: [
-		{ label: 'Discipline', value: project.discipline },
-		{ label: 'My Role', value: project.role },
-		{ label: 'Timeline', value: project.timeline },
-	],
-	darkTitle: project.title,
-	darkBody: project.description,
-	processTitle: 'What the project looked like',
-	processBody: copy.pages.project.nextMockup,
-	cards: [
-		{ title: 'Context', body: project.description },
-		{ title: 'Role', body: project.role },
-		{ title: 'Timeline', body: project.timeline },
-	],
-	results: [
-		{ value: project.year, label: 'project year' },
-		{ value: 'case study', label: 'coming soon' },
-	],
-};
+const projects = copy.projects.items
+	.map((item) => ({
+		...item,
+		categories: item.categories ?? (item.featuredPosition ? ['Featured'] : []),
+	}))
+	.sort((a, b) => (a.featuredPosition ?? 999) - (b.featuredPosition ?? 999));
+const activeMenuFilter = project.categories?.includes('Featured') ? 'Featured' : (project.categories?.[0] ?? 'Featured');
+const caseStudy = project.caseStudy ?? {};
 const projectVisual = project.visual ?? {
 	title: project.title,
 	theme: 'dark',
 	tags: [],
 	media: [{ type: 'mockup', label: project.title }],
 };
+const categories = (project.categories?.length ? project.categories : [project.discipline]).filter(Boolean);
+const visuals = projectVisual.media?.length ? projectVisual.media : [{ type: 'mockup', label: project.title }];
+const overview = caseStudy.overview ?? [
+	{ label: 'My Role', value: project.role },
+	{ label: 'Timeline', value: project.timeline },
+];
+const hasText = (value) => typeof value === 'string' && value.trim().length > 0;
+const getPoints = (item) => (Array.isArray(item?.points) ? item.points.filter(hasText) : []);
+const problem = caseStudy.problem;
+const solution = caseStudy.solution;
+const processItems = Array.isArray(caseStudy.process)
+	? caseStudy.process
+	: hasText(caseStudy.process?.description)
+		? [{ title: 'Process', body: caseStudy.process.description }]
+		: [];
+const challenges = caseStudy.challenges ?? [];
+const impacts =
+	caseStudy.impact ??
+	caseStudy.results?.map((result) => ({
+		title: result.value,
+		description: result.label,
+	})) ??
+	[];
+const hasProblem = problem && hasText(problem.title) && hasText(problem.description);
+const hasSolution = solution && hasText(solution.title) && hasText(solution.description);
+const hasTldr = hasProblem || hasSolution;
+const hasProcesses = processItems.some((item) => hasText(item.title) || hasText(item.body));
+const hasChallenges = challenges.some((item) => hasText(item.title) || item.solutions?.some(hasText));
+const hasImpacts = impacts.some((item) => hasText(item.title) || hasText(item.description));
 ---
 
 <ProgressNav language={language} isHome={false} />
 
+<aside class="case-side-nav" aria-label="Project navigation">
+	<p>Projects</p>
+	<div class="case-side-filters">
+		{copy.projects.filters.map((filter) => (
+			<button
+				type="button"
+				class:list={[filter === activeMenuFilter && 'active']}
+				data-case-project-filter={filter}
+			>
+				{filter}
+			</button>
+		))}
+	</div>
+	{
+		copy.projects.filters.map((filter) => (
+			<div class:list={['case-side-projects', filter !== activeMenuFilter && 'is-hidden']} data-case-project-group={filter}>
+				{projects
+					.filter((item) => item.categories.includes(filter))
+					.map((item) => (
+						<a
+							class:list={[item.slug === project.slug && 'active']}
+							href={localizedPath(language, `/projects/${item.slug}/`)}
+						>
+							{item.title}
+						</a>
+					))}
+			</div>
+		))
+	}
+</aside>
+
 <main class="case-study-page">
-	<a class="case-back" href={`${localizedPath(language, '/')}#projects`}>{copy.pages.project.back}</a>
+	<a class="case-back" href={`${localizedPath(language, '/')}#projects`}>
+		<span aria-hidden="true"></span>
+		{copy.pages.project.back}
+	</a>
 
 	<section class="case-hero">
-		<p class="case-kicker">{caseStudy.kicker}</p>
-		<h1>{caseStudy.heroTitle}</h1>
-		<p>{caseStudy.heroSubtitle}</p>
+		<h1>{caseStudy.heroTitle ?? project.title}</h1>
+		<ul class="case-categories" aria-label="Project categories">
+			{categories.map((category) => <li>{category}</li>)}
+		</ul>
 	</section>
 
-	<section class="project-page-visual" aria-label={`${project.title} visual gallery`}>
-		<div class="project-page-visual-track">
+	<section class="case-visual-gallery" aria-label={`${project.title} visuals`}>
+		<div class="case-visual-track" data-case-visual-track>
 			{
-				projectVisual.media.map((item, index) => (
-					<figure class:list={['project-page-visual-item', `project-page-visual-${projectVisual.theme}`]}>
-						{
-							item.src ? (
-								item.type === 'video' ? (
-									<video class="project-page-media" src={item.src} autoplay muted loop playsinline />
+				visuals.map((item, index) => (
+					<figure class="case-visual-slide">
+						<div class:list={['project-visual', `project-visual-${projectVisual.theme}`]}>
+							{
+								item?.src ? (
+									item.type === 'video' ? (
+										<video class="project-preview-media" src={item.src} autoplay muted loop playsinline />
+									) : (
+										<img class="project-preview-media" src={item.src} alt={item.label} loading={index === 0 ? 'eager' : 'lazy'} />
+									)
+								) : index === 0 ? (
+									<div class="flexd-mark">
+										{projectVisual.tags.map((tag, tagIndex) => (
+											<span class={`pill pill-${tagIndex + 1}`}>{tag}</span>
+										))}
+										<strong>{projectVisual.title}</strong>
+									</div>
 								) : (
-									<img class="project-page-media" src={item.src} alt={item.label} loading={index === 0 ? 'eager' : 'lazy'} />
+									<div class="flexd-mark case-visual-placeholder">
+										<strong>{item.label}</strong>
+									</div>
 								)
-							) : (
-								<div class="project-page-mockup">
-									<div class="project-page-mockup-top">
-										<span></span>
-										<span></span>
-										<span></span>
-									</div>
-									<div class="project-page-mockup-screen">
-										<div class="project-page-mockup-sidebar"></div>
-										<div class="project-page-mockup-content">
-											<div class="project-page-mockup-header"></div>
-											<div class="metric-grid">
-												<span></span>
-												<span></span>
-												<span></span>
-												<span></span>
-											</div>
-											<div class="chart-line"></div>
-										</div>
-									</div>
-								</div>
-							)
-						}
-						<figcaption>
-							<span>{String(index + 1).padStart(2, '0')}</span>
-							{item.label}
-						</figcaption>
+							}
+						</div>
+						<figcaption>{item.label}</figcaption>
 					</figure>
 				))
 			}
 		</div>
-		<p class="project-page-visual-hint">Scroll right -></p>
+		{
+			visuals.length > 1 && (
+				<button class="case-visual-button case-visual-prev" type="button" data-case-visual-prev aria-label="Previous visual">
+					<span aria-hidden="true" />
+				</button>
+			)
+		}
+		<button class="case-visual-next" type="button" data-case-visual-next aria-label="Next visual">
+			<span aria-hidden="true"></span>
+		</button>
 	</section>
 
-	<section class="case-overview">
-		{
-			caseStudy.overview.map((item) => (
+	<section class="case-introduction">
+		<p class="case-kicker">Introduction</p>
+		<div class="case-info-grid">
+			<div>
+				<h2>What was this project about?</h2>
+				<p>{caseStudy.heroSubtitle ?? project.description}</p>
+			</div>
+			{overview.filter((item) => item.label !== 'Category' && (hasText(item.label) || hasText(item.value))).map((item) => (
 				<div>
 					<h2>{item.label}</h2>
-					<p>{item.value}</p>
+					<p set:html={item.value} />
 				</div>
-			))
-		}
-	</section>
-
-	<section class="case-dark">
-		<div>
-			<h2>{caseStudy.darkTitle}</h2>
-		</div>
-		<p>{caseStudy.darkBody}</p>
-	</section>
-
-	<section class="case-deliverable">
-		<p class="case-kicker">What the project looked like</p>
-		<div class="deliverable-screen">
-			<div class="deliverable-column large"></div>
-			<div class="deliverable-column"></div>
-			<div class="deliverable-column"></div>
+			))}
 		</div>
 	</section>
 
-	<section class="case-process">
-		<div>
-			<p class="case-kicker">Process</p>
-			<h2>{caseStudy.processTitle}</h2>
-			<p>{caseStudy.processBody}</p>
-		</div>
-		<div class="case-process-cards">
-			{
-				caseStudy.cards.map((card) => (
-					<article>
-						<h3>{card.title}</h3>
-						<p>{card.body}</p>
-					</article>
-				))
-			}
-		</div>
-	</section>
+	{
+		hasTldr && (
+			<section class="case-tldr">
+				<span class="case-tldr-badge">Quick<br />TL;DR</span>
+				{hasProblem && (
+					<div class="case-tldr-row">
+						<p class="case-kicker">Problem</p>
+						<h2>{problem.title}</h2>
+						{
+							getPoints(problem).length ? (
+								<ul>
+									{getPoints(problem).map((point) => <li>{point}</li>)}
+								</ul>
+							) : (
+								<p>{problem.description}</p>
+							)
+						}
+					</div>
+				)}
+				{hasSolution && (
+					<div class="case-tldr-row">
+						<p class="case-kicker">Solution</p>
+						<h2>{solution.title}</h2>
+						{
+							getPoints(solution).length ? (
+								<ul>
+									{getPoints(solution).map((point) => <li>{point}</li>)}
+								</ul>
+							) : (
+								<p>{solution.description}</p>
+							)
+						}
+					</div>
+				)}
+			</section>
+		)
+	}
 
-	<section class="case-results">
-		{
-			caseStudy.results.map((result) => (
-				<div>
-					<strong>{result.value}</strong>
-					<span>{result.label}</span>
+	{
+		hasProcesses && (
+			<section class="case-process">
+				<span class="case-process-badge">More<br />information</span>
+				<p class="case-kicker">Process</p>
+				<div class="case-process-list">
+					{processItems.filter((card) => hasText(card.title) || hasText(card.body)).map((card, index) => (
+						<article>
+							<span>{String(index + 1).padStart(2, '0')}</span>
+							<p>{card.body}</p>
+						</article>
+					))}
 				</div>
-			))
-		}
-	</section>
+			</section>
+		)
+	}
+
+	{
+		hasChallenges && (
+			<section class="case-challenges">
+				<p class="case-kicker">Challenges Faced</p>
+				<div class="case-challenge-grid">
+					{challenges.filter((challenge) => hasText(challenge.title) || challenge.solutions?.some(hasText)).map((challenge, index) => (
+						<article>
+							<span>{String(index + 1).padStart(2, '0')}</span>
+							<h2>{challenge.title}</h2>
+							{challenge.solutions?.some(hasText) && (
+								<ul>
+									{challenge.solutions.filter(hasText).map((solutionItem) => <li>{solutionItem}</li>)}
+								</ul>
+							)}
+						</article>
+					))}
+				</div>
+			</section>
+		)
+	}
+
+	{
+		hasImpacts && (
+			<section class="case-impact">
+				<p class="case-kicker">Impact</p>
+				<div class="case-impact-grid">
+					{impacts.filter((item) => hasText(item.title) || hasText(item.description)).map((item) => (
+						<article>
+							<h2>{item.title}</h2>
+							<p set:html={item.description} />
+						</article>
+					))}
+				</div>
+			</section>
+		)
+	}
 </main>
+
+<script>
+	const visualTrack = document.querySelector('[data-case-visual-track]');
+	const visualPrev = document.querySelector('[data-case-visual-prev]');
+	const visualNext = document.querySelector('[data-case-visual-next]');
+	const caseProjectFilters = Array.from(document.querySelectorAll('[data-case-project-filter]'));
+	const caseProjectGroups = Array.from(document.querySelectorAll('[data-case-project-group]'));
+
+	const scrollVisual = (direction) => {
+		if (!visualTrack) return;
+
+		const slide = visualTrack.querySelector('.case-visual-slide');
+		const slideWidth = slide?.getBoundingClientRect().width || visualTrack.clientWidth;
+		const scrollAmount = slideWidth + 24;
+		const isAtEnd = visualTrack.scrollLeft + visualTrack.clientWidth >= visualTrack.scrollWidth - 4;
+		const isAtStart = visualTrack.scrollLeft <= 4;
+
+		visualTrack.scrollTo({
+			left: direction > 0 && isAtEnd ? 0 : direction < 0 && isAtStart ? visualTrack.scrollWidth : visualTrack.scrollLeft + direction * scrollAmount,
+			behavior: 'smooth',
+		});
+	};
+
+	visualPrev?.addEventListener('click', () => scrollVisual(-1));
+	visualNext?.addEventListener('click', () => scrollVisual(1));
+
+	caseProjectFilters.forEach((button) => {
+		button.addEventListener('click', () => {
+			const filter = button.getAttribute('data-case-project-filter') || 'Featured';
+
+			caseProjectFilters.forEach((item) => item.classList.toggle('active', item === button));
+			caseProjectGroups.forEach((group) => {
+				group.classList.toggle('is-hidden', group.getAttribute('data-case-project-group') !== filter);
+			});
+		});
+	});
+</script>

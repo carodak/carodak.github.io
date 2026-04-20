@@ -28,6 +28,7 @@ const { label } = Astro.props;
 			<span class="model-loader-bar"></span>
 		</span>
 	</div>
+	<div class="model-filter-wipe" aria-hidden="true"></div>
 </div>
 
 <script type="module" src="/model-viewer.min.js"></script>
@@ -37,17 +38,30 @@ const { label } = Astro.props;
 	const modelViewer = document.querySelector('.avatar-model');
 	const modelLoader = document.querySelector('.model-loader');
 	const modelLoaderBar = document.querySelector('.model-loader-bar');
+	const modelFilterWipe = document.querySelector('.model-filter-wipe');
+	const scrollCue = document.querySelector('.scroll-cue');
 
 	let ticking = false;
 	let currentProgress = 0;
 	let targetProgress = 0;
+	let introZoomPulse = 0;
+	let introZoomPlayed = false;
+	let introZoomReleased = false;
+	let introZoomHeld = false;
+	let introWheelProgress = 0;
+	let cueScrollPending = false;
+	const introWheelThreshold = 900;
 
 	const updateModelZoom = () => {
 		if (!hero || !modelStage) return;
 
 		const rect = hero.getBoundingClientRect();
 		const viewportHeight = window.innerHeight || 1;
-		targetProgress = Math.min(1, Math.max(0, -rect.top / viewportHeight));
+		const scrollProgress = Math.min(1, Math.max(0, -rect.top / viewportHeight));
+		const heroStillVisible = rect.bottom > viewportHeight * 0.18;
+		const heldProgress = introZoomHeld && heroStillVisible ? 0.32 : 0;
+		targetProgress = Math.max(scrollProgress * 0.45, introZoomPulse);
+		targetProgress = Math.max(targetProgress, heldProgress);
 		currentProgress += (targetProgress - currentProgress) * 0.12;
 
 		const easedProgress = 1 - Math.pow(1 - currentProgress, 3);
@@ -67,15 +81,103 @@ const { label } = Astro.props;
 		ticking = false;
 	};
 
+	const triggerFilterWipe = () => {
+		if (!modelFilterWipe || !modelStage) return;
+
+		modelStage.classList.add('is-filter-wiping');
+		modelFilterWipe.classList.remove('is-active');
+		void modelFilterWipe.offsetWidth;
+		modelFilterWipe.classList.add('is-active');
+
+		window.setTimeout(() => {
+			introZoomReleased = true;
+			if (cueScrollPending) {
+				cueScrollPending = false;
+				document.getElementById('intro')?.scrollIntoView({ behavior: 'smooth' });
+			}
+		}, 620);
+
+		window.setTimeout(() => {
+			modelFilterWipe.classList.remove('is-active');
+		}, 1100);
+	};
+
 	const requestModelZoomUpdate = () => {
 		if (ticking) return;
 		ticking = true;
 		window.requestAnimationFrame(updateModelZoom);
 	};
 
+	const spendIntroWheel = (delta) => {
+		if (introZoomPlayed || window.scrollY > 4) return;
+
+		introWheelProgress = Math.min(introWheelThreshold, introWheelProgress + Math.abs(delta));
+		introZoomPulse = (introWheelProgress / introWheelThreshold) * 0.32;
+		requestModelZoomUpdate();
+
+		if (introWheelProgress >= introWheelThreshold) {
+			introZoomPlayed = true;
+			introZoomHeld = true;
+			triggerFilterWipe();
+		}
+	};
+
+	const completeIntroSequence = () => {
+		if (introZoomPlayed) return;
+
+		introWheelProgress = introWheelThreshold;
+		introZoomPulse = 0.32;
+		introZoomPlayed = true;
+		introZoomHeld = true;
+		requestModelZoomUpdate();
+		triggerFilterWipe();
+	};
+
+	const handleInitialWheel = (event) => {
+		if (event.deltaY <= 0 || window.scrollY > 4 || introZoomReleased) return;
+
+		event.preventDefault();
+		if (!introZoomPlayed) spendIntroWheel(event.deltaY);
+	};
+
+	const handleScrollCueClick = (event) => {
+		if (window.scrollY > 4 || introZoomReleased) return;
+
+		event.preventDefault();
+		cueScrollPending = true;
+		completeIntroSequence();
+	};
+
+	const resetIntroZoomAtTop = () => {
+		if (window.scrollY <= 2) {
+			introZoomPlayed = false;
+			introZoomReleased = false;
+			introZoomHeld = false;
+			introWheelProgress = 0;
+			introZoomPulse = 0;
+			return;
+		}
+
+		const rect = hero?.getBoundingClientRect();
+		if (rect && rect.bottom <= window.innerHeight * 0.18) {
+			introZoomHeld = false;
+			introZoomPulse = 0;
+			modelStage?.classList.remove('is-filter-wiping');
+		}
+	};
+
 	updateModelZoom();
-	window.addEventListener('scroll', requestModelZoomUpdate, { passive: true });
+	window.addEventListener(
+		'scroll',
+		() => {
+			requestModelZoomUpdate();
+			resetIntroZoomAtTop();
+		},
+		{ passive: true },
+	);
 	window.addEventListener('resize', requestModelZoomUpdate);
+	window.addEventListener('wheel', handleInitialWheel, { passive: false });
+	scrollCue?.addEventListener('click', handleScrollCueClick);
 
 	modelViewer?.addEventListener('progress', (event) => {
 		const progress = event.detail?.totalProgress ?? 0;

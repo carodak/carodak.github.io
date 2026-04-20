@@ -9,11 +9,14 @@ interface Props {
 
 const { language } = Astro.props;
 const copy = getCopy(language);
-const featuredProjects = copy.projects.items
-	.filter((item) => item.featuredPosition)
-	.sort((a, b) => a.featuredPosition - b.featuredPosition);
-const project = featuredProjects[0];
-const projectPreview = project.visual.media[0];
+const projects = copy.projects.items
+	.map((item) => ({
+		...item,
+		categories: item.categories ?? (item.featuredPosition ? ['Featured'] : []),
+	}))
+	.sort((a, b) => (a.featuredPosition ?? 999) - (b.featuredPosition ?? 999));
+const visibleCategories = (project) => project.categories.filter((category) => category !== 'Featured');
+const experienceHeadingLines = copy.experience.heading.split('\n');
 ---
 
 <ProgressNav language={language} />
@@ -37,59 +40,112 @@ const projectPreview = project.visual.media[0];
 			</a>
 			<div class="intro-copy">
 				<p set:html={copy.intro.body} />
-				<a href={localizedPath(language, '/about/')}>{copy.intro.link}</a>
+				<a class="intro-forward-link" href={localizedPath(language, '/about/')}>
+					{copy.intro.link}
+					<span aria-hidden="true"></span>
+				</a>
 			</div>
 		</div>
 	</section>
 
-	<section class="projects-section" id="projects" aria-labelledby="projects-heading">
+	<section class="projects-section" id="projects" data-chapter aria-labelledby="projects-heading">
 		<div class="projects-heading-row">
 			<p class="tiny-label project-label">{copy.projects.label}</p>
 			<h2 id="projects-heading">{copy.projects.heading}</h2>
 		</div>
-		<a class="project-card" href={localizedPath(language, `/projects/${project.slug}/`)}>
-			<div class="project-info">
-				<p class="project-year">{project.year}</p>
-				<h3>{project.title}</h3>
-				<p>{project.description}</p>
-				<dl>
-					<div>
-						<dt>Discipline</dt>
-						<dd>{project.discipline}</dd>
-					</div>
-					<div>
-						<dt>My Role</dt>
-						<dd>{project.role}</dd>
-					</div>
-					<div>
-						<dt>Timeline</dt>
-						<dd>{project.timeline}</dd>
-					</div>
-				</dl>
-				<span class="blue-button">{copy.projects.cardCta}</span>
+		<div class="project-filter" role="tablist" aria-label="Project categories">
+			<button type="button" class="active" data-project-filter="Featured" aria-pressed="true">
+				Featured
+			</button>
+			<button type="button" class="project-filter-toggle" data-project-filter-toggle aria-expanded="false">
+				More Filters
+			</button>
+			{
+				copy.projects.filters.filter((filter) => filter !== 'Featured').map((filter) => (
+					<button
+						type="button"
+						class="project-filter-extra"
+						data-project-filter={filter}
+						aria-pressed="false"
+						hidden
+					>
+						{filter}
+					</button>
+				))
+			}
+		</div>
+		<div class="project-carousel" data-project-carousel>
+			<div class="project-carousel-status" aria-live="polite">
+				<span data-project-current>01</span>
+				<span data-project-total>{String(projects.filter((project) => project.categories.includes('Featured')).length).padStart(2, '0')}</span>
 			</div>
-			<div class:list={['project-visual', `project-visual-${project.visual.theme}`]} aria-hidden="true">
-				<div class="project-tabs">
-					{featuredProjects.map((item) => <span>{String(item.featuredPosition).padStart(2, '0')}</span>)}
-				</div>
-				{
-					projectPreview?.src ? (
-						projectPreview.type === 'video' ? (
-							<video class="project-preview-media" src={projectPreview.src} autoplay muted loop playsinline />
-						) : (
-							<img class="project-preview-media" src={projectPreview.src} alt="" loading="lazy" />
-						)
-					) : (
-						<div class="flexd-mark">
-							{project.visual.tags.map((tag, index) => (
-								<span class={`pill pill-${index + 1}`}>{tag}</span>
-							))}
-							<strong>{project.visual.title}</strong>
-						</div>
-					)
-				}
+			<div class="project-carousel-controls" aria-label="Project navigation">
+				<button class="project-carousel-button project-carousel-prev" type="button" data-project-prev aria-label="Previous project" hidden>
+					<span aria-hidden="true"></span>
+				</button>
+				<button class="project-carousel-button project-carousel-next" type="button" data-project-next aria-label="Next project">
+					<span aria-hidden="true"></span>
+				</button>
 			</div>
-		</a>
+		</div>
+		<div class="project-list" data-project-list>
+			{
+				projects.map((project, index) => {
+					const projectPreview = project.visual.media[0];
+					return (
+						<a
+							class:list={[
+								'project-card',
+								!project.categories.includes('Featured') && 'is-hidden',
+								project.categories.includes('Featured') && index === 0 && 'is-active',
+							]}
+							href={localizedPath(language, `/projects/${project.slug}/`)}
+							data-project-categories={project.categories.join('|')}
+							data-project-card
+						>
+							<div class="project-info">
+								<p class="project-year">{project.year}</p>
+								<h3>{project.title}</h3>
+								<p>{project.description}</p>
+								<dl>
+									<div>
+										<dt>Category</dt>
+										<dd>{(visibleCategories(project).length ? visibleCategories(project) : [project.discipline]).join(', ')}</dd>
+									</div>
+									<div>
+										<dt>My Role</dt>
+										<dd>{project.role}</dd>
+									</div>
+									<div>
+										<dt>Timeline</dt>
+										<dd>{project.timeline}</dd>
+									</div>
+								</dl>
+								<span class="blue-button">{copy.projects.cardCta}</span>
+							</div>
+							<div class:list={['project-visual', `project-visual-${project.visual.theme}`]} aria-hidden="true">
+								{
+									projectPreview?.src ? (
+										projectPreview.type === 'video' ? (
+											<video class="project-preview-media" src={projectPreview.src} autoplay muted loop playsinline />
+										) : (
+											<img class="project-preview-media" src={projectPreview.src} alt="" loading="lazy" />
+										)
+									) : (
+										<div class="flexd-mark">
+											{project.visual.tags.map((tag, index) => (
+												<span class={`pill pill-${index + 1}`}>{tag}</span>
+											))}
+											<strong>{project.visual.title}</strong>
+										</div>
+									)
+								}
+							</div>
+						</a>
+					);
+				})
+			}
+		</div>
 	</section>
 
 	<section class="testimonial-section">
@@ -106,7 +162,13 @@ const projectPreview = project.visual.media[0];
 	<section class="experience-section" id="resume" data-chapter>
 		<div class="experience-heading-row">
 			<p class="tiny-label">{copy.experience.eyebrow}</p>
-			<h2>{copy.experience.heading}</h2>
+			<h2 class="experience-title">
+				<span class="experience-title-line">{experienceHeadingLines[0]}</span>
+				<span class="experience-title-line experience-title-marked">
+					<span class="experience-title-curve" aria-hidden="true"></span>
+					{experienceHeadingLines[1]}
+				</span>
+			</h2>
 		</div>
 		<div class="experience-list">
 			{
@@ -130,3 +192,151 @@ const projectPreview = project.visual.media[0];
 		</div>
 	</section>
 </main>
+
+<script>
+	const filterButtons = Array.from(document.querySelectorAll('[data-project-filter]'));
+	const filterToggle = document.querySelector('[data-project-filter-toggle]');
+	const extraFilters = Array.from(document.querySelectorAll('.project-filter-extra'));
+	const projectsSection = document.querySelector('.projects-section');
+	const projectList = document.querySelector('[data-project-list]');
+	const projectCards = Array.from(document.querySelectorAll('[data-project-card]'));
+	const projectCurrent = document.querySelector('[data-project-current]');
+	const projectTotal = document.querySelector('[data-project-total]');
+	const projectPrev = document.querySelector('[data-project-prev]');
+	const projectNext = document.querySelector('[data-project-next]');
+	let activeFilter = 'Featured';
+	let activeProjectIndex = 0;
+	let wheelLock = false;
+	let wheelProgress = 0;
+	let wheelDirection = 0;
+	let wheelResetTimer;
+	const wheelThreshold = 220;
+
+	const getVisibleProjects = () =>
+		projectCards.filter((card) => {
+			const categories = (card.getAttribute('data-project-categories') || '').split('|');
+			return categories.includes(activeFilter);
+		});
+
+	const updateProjectCarousel = (direction = 0) => {
+		const visibleProjects = getVisibleProjects();
+
+		activeProjectIndex = Math.max(0, Math.min(activeProjectIndex, visibleProjects.length - 1));
+
+		projectCards.forEach((card) => {
+			const visibleIndex = visibleProjects.indexOf(card);
+			const isVisible = visibleIndex !== -1;
+			const isActive = visibleIndex === activeProjectIndex;
+
+			card.classList.toggle('is-hidden', !isVisible);
+			card.classList.toggle('is-active', isActive);
+			card.classList.toggle('is-before', isVisible && visibleIndex < activeProjectIndex);
+			card.classList.toggle('is-after', isVisible && visibleIndex > activeProjectIndex);
+			card.setAttribute('aria-hidden', String(!isActive));
+			card.tabIndex = isActive ? 0 : -1;
+			card.style.setProperty('--project-direction', String(direction || 1));
+		});
+
+		if (projectCurrent) projectCurrent.textContent = String(activeProjectIndex + 1).padStart(2, '0');
+		if (projectTotal) projectTotal.textContent = String(visibleProjects.length).padStart(2, '0');
+		if (projectPrev) projectPrev.hidden = activeProjectIndex <= 0;
+		if (projectNext) projectNext.hidden = activeProjectIndex >= visibleProjects.length - 1;
+	};
+
+	const resetWheelProgress = () => {
+		wheelProgress = 0;
+		wheelDirection = 0;
+	};
+
+	const isProjectListCentered = () => {
+		if (!projectList) return false;
+
+		const rect = projectList.getBoundingClientRect();
+		const listCenter = rect.top + rect.height / 2;
+		const viewportCenter = window.innerHeight / 2;
+		const centerWindow = Math.min(190, window.innerHeight * 0.24);
+
+		return Math.abs(listCenter - viewportCenter) <= centerWindow;
+	};
+
+	const goToProject = (nextIndex) => {
+		const visibleProjects = getVisibleProjects();
+		const clampedIndex = Math.max(0, Math.min(nextIndex, visibleProjects.length - 1));
+		const direction = clampedIndex > activeProjectIndex ? 1 : -1;
+
+		if (clampedIndex === activeProjectIndex) return false;
+		activeProjectIndex = clampedIndex;
+		updateProjectCarousel(direction);
+		return true;
+	};
+
+	filterToggle?.addEventListener('click', () => {
+		const isExpanded = filterToggle.getAttribute('aria-expanded') === 'true';
+		filterToggle.setAttribute('aria-expanded', String(!isExpanded));
+		filterToggle.textContent = isExpanded ? 'More Filters' : 'Less Filters';
+		extraFilters.forEach((button) => {
+			button.hidden = isExpanded;
+		});
+	});
+
+	filterButtons.forEach((button) => {
+		button.addEventListener('click', () => {
+			const filter = button.getAttribute('data-project-filter') || 'Featured';
+			activeFilter = filter;
+			activeProjectIndex = 0;
+
+			filterButtons.forEach((item) => {
+				const isActive = item === button;
+				item.classList.toggle('active', isActive);
+				item.setAttribute('aria-pressed', String(isActive));
+			});
+
+			updateProjectCarousel(1);
+		});
+	});
+
+	projectPrev?.addEventListener('click', () => goToProject(activeProjectIndex - 1));
+	projectNext?.addEventListener('click', () => goToProject(activeProjectIndex + 1));
+
+	projectsSection?.addEventListener(
+		'wheel',
+		(event) => {
+			const visibleProjects = getVisibleProjects();
+			if (visibleProjects.length <= 1 || Math.abs(event.deltaY) < 12) return;
+			if (!isProjectListCentered()) {
+				resetWheelProgress();
+				return;
+			}
+
+			const direction = event.deltaY > 0 ? 1 : -1;
+			const canNavigate = direction > 0 ? activeProjectIndex < visibleProjects.length - 1 : activeProjectIndex > 0;
+
+			if (!canNavigate) return;
+
+			event.preventDefault();
+			if (wheelLock) return;
+
+			if (wheelDirection !== direction) {
+				wheelProgress = 0;
+				wheelDirection = direction;
+			}
+
+			wheelProgress += Math.abs(event.deltaY);
+
+			window.clearTimeout(wheelResetTimer);
+			wheelResetTimer = window.setTimeout(resetWheelProgress, 420);
+
+			if (wheelProgress >= wheelThreshold) {
+				goToProject(activeProjectIndex + direction);
+				resetWheelProgress();
+				wheelLock = true;
+				window.setTimeout(() => {
+					wheelLock = false;
+				}, 360);
+			}
+		},
+		{ passive: false },
+	);
+
+	updateProjectCarousel();
+</script>
