@@ -7,15 +7,87 @@ const { label } = Astro.props;
 ---
 
 <div class="model-stage" aria-label={label}>
-	<div class="model-shadow"></div>
-	<div class="model-figure">
-		<div class="model-head"></div>
-		<div class="model-torso"></div>
-		<div class="model-arm model-arm-left"></div>
-		<div class="model-arm model-arm-right"></div>
-		<div class="model-core"></div>
+	<model-viewer
+		class="avatar-model"
+		src="/the_long_drive_home.glb"
+		alt={label}
+		loading="eager"
+		reveal="auto"
+		auto-rotate
+		interaction-prompt="none"
+		shadow-intensity="0.65"
+		exposure="1"
+		camera-orbit="0deg 75deg 3.2m"
+		field-of-view="28deg"
+	>
+		<p class="model-fallback">3D model loading...</p>
+	</model-viewer>
+	<div class="model-loader" aria-live="polite">
+		<span class="model-loader-label">Loading...</span>
+		<span class="model-loader-track">
+			<span class="model-loader-bar"></span>
+		</span>
 	</div>
-	<div class="model-note note-one">focus</div>
-	<div class="model-note note-two">craft</div>
-	<div class="model-note note-three">systems</div>
 </div>
+
+<script type="module" src="/model-viewer.min.js"></script>
+<script>
+	const hero = document.querySelector('.hero-section');
+	const modelStage = document.querySelector('.model-stage');
+	const modelViewer = document.querySelector('.avatar-model');
+	const modelLoader = document.querySelector('.model-loader');
+	const modelLoaderBar = document.querySelector('.model-loader-bar');
+
+	let ticking = false;
+	let currentProgress = 0;
+	let targetProgress = 0;
+
+	const updateModelZoom = () => {
+		if (!hero || !modelStage) return;
+
+		const rect = hero.getBoundingClientRect();
+		const viewportHeight = window.innerHeight || 1;
+		targetProgress = Math.min(1, Math.max(0, -rect.top / viewportHeight));
+		currentProgress += (targetProgress - currentProgress) * 0.12;
+
+		const easedProgress = 1 - Math.pow(1 - currentProgress, 3);
+		const fieldOfView = 28 - easedProgress * 11;
+		const cameraDistance = 3.2 - easedProgress * 0.9;
+		const opacity = 1 - easedProgress * 0.1;
+
+		modelStage.style.setProperty('--model-scroll-opacity', String(opacity));
+		modelViewer?.setAttribute('field-of-view', `${fieldOfView}deg`);
+		modelViewer?.setAttribute('camera-orbit', `0deg 75deg ${cameraDistance}m`);
+
+		if (Math.abs(targetProgress - currentProgress) > 0.001) {
+			window.requestAnimationFrame(updateModelZoom);
+			return;
+		}
+
+		ticking = false;
+	};
+
+	const requestModelZoomUpdate = () => {
+		if (ticking) return;
+		ticking = true;
+		window.requestAnimationFrame(updateModelZoom);
+	};
+
+	updateModelZoom();
+	window.addEventListener('scroll', requestModelZoomUpdate, { passive: true });
+	window.addEventListener('resize', requestModelZoomUpdate);
+
+	modelViewer?.addEventListener('progress', (event) => {
+		const progress = event.detail?.totalProgress ?? 0;
+		modelLoaderBar?.style.setProperty('--model-load-progress', `${Math.round(progress * 100)}%`);
+	});
+
+	modelViewer?.addEventListener('load', () => {
+		modelLoaderBar?.style.setProperty('--model-load-progress', '100%');
+		modelLoader?.classList.add('is-loaded');
+	});
+
+	modelViewer?.addEventListener('error', () => {
+		modelLoader?.classList.add('has-error');
+	});
+</script>

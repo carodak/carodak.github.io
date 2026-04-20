@@ -1,0 +1,155 @@
+---
+import ProgressNav from './ProgressNav.astro';
+import { localizedPath, type Language } from '../data/site';
+
+interface Props {
+	language: Language;
+	copy: any;
+	project: any;
+}
+
+const { language, copy, project } = Astro.props;
+const caseStudy = project.caseStudy ?? {
+	kicker: project.discipline,
+	heroTitle: project.title,
+	heroSubtitle: project.description,
+	overview: [
+		{ label: 'Discipline', value: project.discipline },
+		{ label: 'My Role', value: project.role },
+		{ label: 'Timeline', value: project.timeline },
+	],
+	darkTitle: project.title,
+	darkBody: project.description,
+	processTitle: 'What the project looked like',
+	processBody: copy.pages.project.nextMockup,
+	cards: [
+		{ title: 'Context', body: project.description },
+		{ title: 'Role', body: project.role },
+		{ title: 'Timeline', body: project.timeline },
+	],
+	results: [
+		{ value: project.year, label: 'project year' },
+		{ value: 'case study', label: 'coming soon' },
+	],
+};
+const projectVisual = project.visual ?? {
+	title: project.title,
+	theme: 'dark',
+	tags: [],
+	media: [{ type: 'mockup', label: project.title }],
+};
+---
+
+<ProgressNav language={language} isHome={false} />
+
+<main class="case-study-page">
+	<a class="case-back" href={`${localizedPath(language, '/')}#projects`}>{copy.pages.project.back}</a>
+
+	<section class="case-hero">
+		<p class="case-kicker">{caseStudy.kicker}</p>
+		<h1>{caseStudy.heroTitle}</h1>
+		<p>{caseStudy.heroSubtitle}</p>
+	</section>
+
+	<section class="project-page-visual" aria-label={`${project.title} visual gallery`}>
+		<div class="project-page-visual-track">
+			{
+				projectVisual.media.map((item, index) => (
+					<figure class:list={['project-page-visual-item', `project-page-visual-${projectVisual.theme}`]}>
+						{
+							item.src ? (
+								item.type === 'video' ? (
+									<video class="project-page-media" src={item.src} autoplay muted loop playsinline />
+								) : (
+									<img class="project-page-media" src={item.src} alt={item.label} loading={index === 0 ? 'eager' : 'lazy'} />
+								)
+							) : (
+								<div class="project-page-mockup">
+									<div class="project-page-mockup-top">
+										<span></span>
+										<span></span>
+										<span></span>
+									</div>
+									<div class="project-page-mockup-screen">
+										<div class="project-page-mockup-sidebar"></div>
+										<div class="project-page-mockup-content">
+											<div class="project-page-mockup-header"></div>
+											<div class="metric-grid">
+												<span></span>
+												<span></span>
+												<span></span>
+												<span></span>
+											</div>
+											<div class="chart-line"></div>
+										</div>
+									</div>
+								</div>
+							)
+						}
+						<figcaption>
+							<span>{String(index + 1).padStart(2, '0')}</span>
+							{item.label}
+						</figcaption>
+					</figure>
+				))
+			}
+		</div>
+		<p class="project-page-visual-hint">Scroll right -></p>
+	</section>
+
+	<section class="case-overview">
+		{
+			caseStudy.overview.map((item) => (
+				<div>
+					<h2>{item.label}</h2>
+					<p>{item.value}</p>
+				</div>
+			))
+		}
+	</section>
+
+	<section class="case-dark">
+		<div>
+			<h2>{caseStudy.darkTitle}</h2>
+		</div>
+		<p>{caseStudy.darkBody}</p>
+	</section>
+
+	<section class="case-deliverable">
+		<p class="case-kicker">What the project looked like</p>
+		<div class="deliverable-screen">
+			<div class="deliverable-column large"></div>
+			<div class="deliverable-column"></div>
+			<div class="deliverable-column"></div>
+		</div>
+	</section>
+
+	<section class="case-process">
+		<div>
+			<p class="case-kicker">Process</p>
+			<h2>{caseStudy.processTitle}</h2>
+			<p>{caseStudy.processBody}</p>
+		</div>
+		<div class="case-process-cards">
+			{
+				caseStudy.cards.map((card) => (
+					<article>
+						<h3>{card.title}</h3>
+						<p>{card.body}</p>
+					</article>
+				))
+			}
+		</div>
+	</section>
+
+	<section class="case-results">
+		{
+			caseStudy.results.map((result) => (
+				<div>
+					<strong>{result.value}</strong>
+					<span>{result.label}</span>
+				</div>
+			))
+		}
+	</section>
+</main>

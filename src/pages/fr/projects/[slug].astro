@@ -1,23 +1,22 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProjectCaseStudy from '../../../components/ProjectCaseStudy.astro';
 import { getCopy } from '../../../data/site';
 
 export function getStaticPaths() {
 	const copy = getCopy('fr');
-	return copy.projects.items.map((project) => ({ params: { slug: project.slug }, props: { project } }));
+	return copy.projects.items.map((project) => ({ params: { slug: project.slug } }));
 }
 
 const language = 'fr';
 const copy = getCopy(language);
-const { project } = Astro.props;
+const project = copy.projects.items.find((item) => item.slug === Astro.params.slug);
+
+if (!project) {
+	throw new Error(`Project not found: ${Astro.params.slug}`);
+}
 ---
 
 <BaseLayout title={`${project.title} - ${copy.name}`} description={project.description} language={language} path={`/projects/${project.slug}/`}>
-	<main class="simple-page project-page">
-		<a href={`/fr/#projects`}>{copy.pages.project.back}</a>
-		<p class="project-year">{project.year}</p>
-		<h1>{project.title}</h1>
-		<p>{project.description}</p>
-		<p>{copy.pages.project.nextMockup}</p>
-	</main>
+	<ProjectCaseStudy language={language} copy={copy} project={project} />
 </BaseLayout>

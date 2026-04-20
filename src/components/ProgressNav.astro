@@ -3,9 +3,15 @@ import { chapterNav, type Language, localizedPath } from '../data/site';
 
 interface Props {
 	language: Language;
+	isHome?: boolean;
 }
 
-const { language } = Astro.props;
+const { language, isHome = true } = Astro.props;
+
+const sectionHref = (id: string) => {
+	if (isHome) return `#${id}`;
+	return `${localizedPath(language, '/')}#${id}`;
+};
 ---
 
 <aside class="progress-nav" aria-label="Page chapters">
@@ -14,7 +20,7 @@ const { language } = Astro.props;
 			chapterNav.map((chapter) => (
 				<li>
 					<a
-						href={chapter.kind === 'page' ? localizedPath(language, chapter.path) : `#${chapter.id}`}
+						href={chapter.kind === 'page' ? localizedPath(language, chapter.path) : sectionHref(chapter.id)}
 						data-chapter-link={chapter.id}
 						data-chapter-kind={chapter.kind}
 					>

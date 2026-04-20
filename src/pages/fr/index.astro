@@ -7,6 +7,6 @@ const language = 'fr';
 const copy = getCopy(language);
 ---
 
-<BaseLayout title={copy.title} description={copy.description} language={language} path="/">
+<BaseLayout title={copy.title} description={copy.description} language={language} path="/" preloadModel>
 	<HomePage language={language} />
 </BaseLayout>

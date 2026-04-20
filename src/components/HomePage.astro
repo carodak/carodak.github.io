@@ -9,7 +9,11 @@ interface Props {
 
 const { language } = Astro.props;
 const copy = getCopy(language);
-const project = copy.projects.items[0];
+const featuredProjects = copy.projects.items
+	.filter((item) => item.featuredPosition)
+	.sort((a, b) => a.featuredPosition - b.featuredPosition);
+const project = featuredProjects[0];
+const projectPreview = project.visual.media[0];
 ---
 
 <ProgressNav language={language} />
@@ -64,20 +68,26 @@ const project = copy.projects.items[0];
 				</dl>
 				<span class="blue-button">{copy.projects.cardCta}</span>
 			</div>
-			<div class="project-visual" aria-hidden="true">
+			<div class:list={['project-visual', `project-visual-${project.visual.theme}`]} aria-hidden="true">
 				<div class="project-tabs">
-					<span>04</span>
-					<span>03</span>
-					<span>02</span>
-					<span>01</span>
+					{featuredProjects.map((item) => <span>{String(item.featuredPosition).padStart(2, '0')}</span>)}
 				</div>
-				<div class="flexd-mark">
-					<span class="pill pill-one">track result</span>
-					<span class="pill pill-two">check in</span>
-					<span class="pill pill-three">streak of 20 days</span>
-					<span class="pill pill-four">high five</span>
-					<strong>Flex-d</strong>
-				</div>
+				{
+					projectPreview?.src ? (
+						projectPreview.type === 'video' ? (
+							<video class="project-preview-media" src={projectPreview.src} autoplay muted loop playsinline />
+						) : (
+							<img class="project-preview-media" src={projectPreview.src} alt="" loading="lazy" />
+						)
+					) : (
+						<div class="flexd-mark">
+							{project.visual.tags.map((tag, index) => (
+								<span class={`pill pill-${index + 1}`}>{tag}</span>
+							))}
+							<strong>{project.visual.title}</strong>
+						</div>
+					)
+				}
 			</div>
 		</a>
 	</section>

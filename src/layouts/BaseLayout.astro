@@ -7,26 +7,42 @@ interface Props {
 	description: string;
 	language?: Language;
 	path?: string;
+	preloadModel?: boolean;
 }
 
-const { title, description, language = defaultLanguage, path = '/' } = Astro.props;
+const { title, description, language = defaultLanguage, path = '/', preloadModel = false } = Astro.props;
 ---
 
 <!doctype html>
 <html lang={language}>
 	<head>
 		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
+		<link rel="icon" type="image/svg+xml" href="/logo.png" />
+		<link rel="icon" href="/logo.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="description" content={description} />
+		{
+			preloadModel && (
+				<>
+					<link rel="modulepreload" href="/model-viewer.min.js" />
+					<link
+						rel="preload"
+						href="/the_long_drive_home.glb"
+						as="fetch"
+						type="model/gltf-binary"
+						crossorigin="anonymous"
+						fetchpriority="high"
+					/>
+				</>
+			)
+		}
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>
 	<body>
 		<header class="site-top" aria-label="Site header">
 			<a class="brand" href={localizedPath(language, '/')} aria-label="Home">
-				<img class="brand-house" src="/inn.png" alt="" aria-hidden="true" />
+				<img class="brand-house" src="/logo.png" alt="" aria-hidden="true" />
 				<span>CARODAK</span>
 			</a>
 			<nav class="language-switch" aria-label="Language">
