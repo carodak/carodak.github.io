@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCopy } from '../../data/site';
+
+export function getStaticPaths() {
+	const copy = getCopy('en');
+	return copy.projects.items.map((project) => ({ params: { slug: project.slug }, props: { project } }));
+}
+
+const language = 'en';
+const copy = getCopy(language);
+const { project } = Astro.props;
+---
+
+<BaseLayout title={`${project.title} - ${copy.name}`} description={project.description} language={language} path={`/projects/${project.slug}/`}>
+	<main class="simple-page project-page">
+		<a href={`/#projects`}>{copy.pages.project.back}</a>
+		<p class="project-year">{project.year}</p>
+		<h1>{project.title}</h1>
+		<p>{project.description}</p>
+		<p>{copy.pages.project.nextMockup}</p>
+	</main>
+</BaseLayout>

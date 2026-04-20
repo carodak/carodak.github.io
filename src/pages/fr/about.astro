@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCopy } from '../../data/site';
+
+const language = 'fr';
+const copy = getCopy(language);
+---
+
+<BaseLayout title={`${copy.pages.about.title} - ${copy.name}`} description={copy.description} language={language} path="/about/">
+	<main class="simple-page">
+		<a href="/fr/">C.</a>
+		<h1>{copy.pages.about.title}</h1>
+		<p>{copy.pages.about.body}</p>
+	</main>
+</BaseLayout>

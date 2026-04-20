@@ -1,0 +1,47 @@
+---
+import '../styles/global.css';
+import { defaultLanguage, languages, localizedPath, type Language } from '../data/site';
+
+interface Props {
+	title: string;
+	description: string;
+	language?: Language;
+	path?: string;
+}
+
+const { title, description, language = defaultLanguage, path = '/' } = Astro.props;
+---
+
+<!doctype html>
+<html lang={language}>
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content={description} />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body>
+		<header class="site-top" aria-label="Site header">
+			<a class="brand" href={localizedPath(language, '/')} aria-label="Home">
+				<img class="brand-house" src="/inn.png" alt="" aria-hidden="true" />
+				<span>CARODAK</span>
+			</a>
+			<nav class="language-switch" aria-label="Language">
+				{
+					languages.map((item, index) => (
+						<>
+							<a class:list={{ active: item === language }} href={localizedPath(item, path)}>
+								{item.toUpperCase()}
+							</a>
+							{index < languages.length - 1 && <span>|</span>}
+						</>
+					))
+				}
+			</nav>
+		</header>
+		<slot />
+	</body>
+</html>

@@ -1,0 +1,21 @@
+---
+interface Props {
+	label: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="model-stage" aria-label={label}>
+	<div class="model-shadow"></div>
+	<div class="model-figure">
+		<div class="model-head"></div>
+		<div class="model-torso"></div>
+		<div class="model-arm model-arm-left"></div>
+		<div class="model-arm model-arm-right"></div>
+		<div class="model-core"></div>
+	</div>
+	<div class="model-note note-one">focus</div>
+	<div class="model-note note-two">craft</div>
+	<div class="model-note note-three">systems</div>
+</div>
