@@ -47,16 +47,22 @@ const sectionHref = (id: string) => {
 		});
 	};
 
+	const clearAtPageTop = () => {
+		if (window.scrollY < 80) setActive(null);
+	};
+
 	const observer = new IntersectionObserver(
 		(entries) => {
 			const visible = entries
 				.filter((entry) => entry.isIntersecting)
 				.sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
 
-			if (visible) setActive(visible.target.id);
+			if (visible && window.scrollY >= 80) setActive(visible.target.id);
 		},
 		{ rootMargin: '-35% 0px -45% 0px', threshold: [0.12, 0.35, 0.6] },
 	);
 
 	sections.forEach((section) => observer.observe(section));
+	clearAtPageTop();
+	window.addEventListener('scroll', clearAtPageTop, { passive: true });
 </script>

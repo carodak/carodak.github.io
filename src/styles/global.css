@@ -78,6 +78,7 @@ h3 {
 	display: inline-flex;
 	align-items: center;
 	gap: 18px;
+	font-family: "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 	font-size: 22px;
 	line-height: 1;
 }
@@ -119,7 +120,7 @@ h3 {
 	top: calc(42px + var(--brand-size) + 10px);
 	left: calc(var(--nav-left-rail) - (var(--chapter-dot-active-size) / 2));
 	z-index: 15;
-	font-family: Arial, sans-serif;
+	font-family: "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 	font-size: 13px;
 	line-height: 1;
 	color: #777;
@@ -192,7 +193,8 @@ h3 {
 }
 
 .progress-nav a.active span:last-child {
-	background: rgba(255, 255, 255, 0.72);
+	background: rgba(0, 0, 0, 0.04);
+  	font-weight: 900;
 }
 
 .progress-nav a:hover {
