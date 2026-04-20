@@ -15,6 +15,12 @@
 	--section-pad-bottom-loose: 17vh;
 	--section-pad-mobile-top: 12vh;
 	--section-pad-mobile-bottom: 14vh;
+	--body-copy-size: 23px;
+	--left-rail: 72px;
+	--brand-size: 60px;
+	--brand-text-offset: 9px;
+	--chapter-dot-size: 10px;
+	--chapter-dot-active-size: 18px;
 	font-family: "Times New Roman", Times, serif;
 	color: var(--ink);
 	background: var(--paper);
@@ -52,7 +58,7 @@ h3 {
 .site-top {
 	position: fixed;
 	top: 42px;
-	left: 42px;
+	left: calc(var(--left-rail) - (var(--brand-size) / 2));
 	right: 42px;
 	z-index: 20;
 	display: flex;
@@ -74,10 +80,14 @@ h3 {
 	line-height: 1;
 }
 
+.brand span {
+	transform: translateY(var(--brand-text-offset));
+}
+
 .brand-house {
 	display: block;
-	width: 60px;
-	height: 60px;
+	width: var(--brand-size);
+	height: var(--brand-size);
 	object-fit: contain;
 }
 
@@ -103,10 +113,10 @@ h3 {
 
 .progress-nav {
 	position: fixed;
-	top: 112px;
-	left: 76px;
+	top: calc(42px + var(--brand-size) + 10px);
+	left: calc(var(--left-rail) - (var(--chapter-dot-active-size) / 2));
 	z-index: 15;
-	font-size: 16px;
+	font-size: 18px;
 	line-height: 1.1;
 	color: #777;
 }
@@ -132,7 +142,7 @@ h3 {
 .progress-nav a::before {
 	content: "";
 	position: absolute;
-	left: 5px;
+	left: calc((var(--chapter-dot-active-size) / 2) - 0.5px);
 	top: -14px;
 	width: 1px;
 	height: 16px;
@@ -144,24 +154,35 @@ h3 {
 }
 
 .chapter-dot {
-	width: 10px;
-	height: 10px;
+	position: relative;
+	width: var(--chapter-dot-active-size);
+	height: var(--chapter-dot-active-size);
+	flex: 0 0 var(--chapter-dot-active-size);
+}
+
+.chapter-dot::before {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: var(--chapter-dot-size);
+	height: var(--chapter-dot-size);
 	border-radius: 50%;
 	background: #a4a4a4;
-	flex: 0 0 auto;
+	transform: translate(-50%, -50%);
 }
 
 .progress-nav a.active {
 	color: var(--ink);
 }
 
-.progress-nav a.active .chapter-dot {
-	width: 18px;
-	height: 18px;
+.progress-nav a.active .chapter-dot::before {
+	width: var(--chapter-dot-active-size);
+	height: var(--chapter-dot-active-size);
 	border-radius: 0;
 	background: #e2a918;
 	border: 2px solid #2f2f2f;
-	transform: rotate(45deg);
+	transform: translate(-50%, -50%) rotate(45deg);
 }
 
 .hero-section {
@@ -170,7 +191,9 @@ h3 {
 	min-height: 100svh;
 	margin-left: calc(50% - 50vw);
 	display: grid;
-	place-items: center;
+	align-content: center;
+	justify-items: center;
+	row-gap: 5px;
 	padding: 76px 24px 92px;
 }
 
@@ -316,48 +339,45 @@ h3 {
 }
 
 .scroll-cue {
-	position: absolute;
-	bottom: 26px;
-	width: 40px;
-	height: 70px;
+	position: relative;
+	width: 38px;
+	height: 54px;
 	margin-top: 0;
+	display: grid;
+	place-items: center;
+	animation: scroll-cue-bounce 1.7s ease-in-out infinite;
 }
 
 .scroll-cue::before {
 	content: "";
 	position: absolute;
-	left: 18px;
-	top: 4px;
-	width: 18px;
-	height: 34px;
-	border-left: 2px solid var(--ink);
-	border-bottom: 2px solid var(--ink);
-	border-radius: 0 0 0 18px;
-	transform: rotate(-24deg);
-}
-
-.scroll-cue span,
-.scroll-cue span::before,
-.scroll-cue span::after {
-	position: absolute;
+	left: 50%;
+	top: 5px;
 	width: 2px;
-	height: 21px;
+	height: 32px;
 	background: var(--ink);
-	content: "";
-	left: 19px;
-	top: 30px;
+	transform: translateX(-50%);
 }
 
-.scroll-cue span::before {
-	left: -6px;
-	top: -2px;
-	transform: rotate(-28deg);
+.scroll-cue span {
+	position: absolute;
+	left: 50%;
+	bottom: 12px;
+	width: 16px;
+	height: 16px;
+	border-right: 2px solid var(--ink);
+	border-bottom: 2px solid var(--ink);
+	transform: translateX(-50%) rotate(45deg);
 }
 
-.scroll-cue span::after {
-	left: 6px;
-	top: -2px;
-	transform: rotate(28deg);
+@keyframes scroll-cue-bounce {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(10px);
+	}
 }
 
 .intro-section {
@@ -367,6 +387,7 @@ h3 {
 	min-height: var(--section-min);
 	align-items: center;
 	padding: var(--section-pad-top) 0 var(--section-pad-bottom);
+	scroll-margin-top: calc((100vh - var(--section-min)) / 2);
 }
 
 .intro-heading h1 {
@@ -387,16 +408,20 @@ h3 {
 .intro-copy {
 	grid-column: 1 / -1;
 	max-width: 530px;
-	font-size: 16px;
+	font-size: var(--body-copy-size);
 	line-height: 1.58;
 	justify-self: start;
+}
+
+.intro-copy p {
+	white-space: pre-line;
 }
 
 .intro-copy a {
 	display: block;
 	width: max-content;
 	margin: 24px auto 0;
-	font-size: 14px;
+	font-size: 18px;
 }
 
 .scribble-link {
@@ -447,7 +472,7 @@ h3 {
 
 .tiny-label {
 	white-space: pre-line;
-	font-size: 13px;
+	font-size: 18px;
 	line-height: 1.05;
 	color: var(--ink);
 }
@@ -548,7 +573,7 @@ h3 {
 	background: var(--blue);
 	color: white;
 	font-family: Arial, sans-serif;
-	font-size: 12px;
+	font-size: 18px;
 	line-height: 1;
 }
 
@@ -646,12 +671,13 @@ h3 {
 }
 
 .testimonial-section {
-	display: grid;
-	grid-template-columns: 150px 1fr 150px;
-	align-items: center;
-	gap: 22px;
 	min-height: var(--section-min);
 	padding: var(--section-pad-top) 64px calc(var(--section-pad-bottom) + 2vh);
+}
+
+.testimonial-section > div {
+	max-width: 760px;
+	margin: 0 auto;
 }
 
 .testimonial-section h2 {
@@ -660,11 +686,19 @@ h3 {
 	font-size: clamp(42px, 7vw, 70px);
 	line-height: 1.2;
 	margin-bottom: 28px;
+	text-align: center;
+}
+
+.testimonial-quote {
+	display: grid;
+	grid-template-columns: 90px minmax(0, 520px) 90px;
+	gap: 22px;
+	align-items: start;
 }
 
 .testimonial-section p {
 	max-width: 520px;
-	font-size: 16px;
+	font-size: var(--body-copy-size);
 	line-height: 1.35;
 }
 
@@ -676,8 +710,8 @@ h3 {
 }
 
 .quote-right {
-	align-self: start;
-	margin-top: 78px;
+	justify-self: end;
+	margin-top: -8px;
 }
 
 .experience-section {
@@ -712,10 +746,21 @@ h3 {
 	width: 86px;
 	height: 48px;
 	margin-right: 36px;
-	border-top: 4px solid var(--blue);
+	border-bottom: 4px solid var(--blue);
 	border-left: 4px solid var(--blue);
-	border-radius: 58px 0 0 0;
-	transform: rotate(-30deg) translateY(-10px);
+	border-radius: 0 0 0 58px;
+	transform: rotate(-18deg) translateY(-10px);
+}
+
+.experience-section h2::after {
+	content: "";
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	margin-left: -34px;
+	border-left: 4px solid var(--blue);
+	border-bottom: 4px solid var(--blue);
+	transform: rotate(-42deg) translate(-9px, 18px);
 }
 
 .experience-list {
@@ -738,7 +783,7 @@ h3 {
 
 .experience-row p,
 .experience-row time {
-	font-size: 13px;
+	font-size: 18px;
 }
 
 .experience-row p {
@@ -803,7 +848,7 @@ h3 {
 
 .email-link {
 	color: var(--blue);
-	font-size: 12px;
+	font-size: 23px;
 }
 
 .simple-page {
@@ -828,7 +873,7 @@ h3 {
 
 .simple-page p {
 	max-width: 620px;
-	font-size: 20px;
+	font-size: var(--body-copy-size);
 	line-height: 1.45;
 }
 
@@ -838,7 +883,7 @@ h3 {
 
 @media (max-width: 1180px) {
 	.progress-nav {
-		left: 30px;
+		left: calc(var(--left-rail) - (var(--chapter-dot-active-size) / 2));
 	}
 
 	.progress-nav span:last-child {
@@ -932,9 +977,17 @@ h3 {
 	}
 
 	.testimonial-section {
-		grid-template-columns: 48px 1fr 48px;
 		min-height: var(--section-min);
 		padding: var(--section-pad-mobile-top) 0 calc(var(--section-pad-mobile-bottom) + 1vh);
+	}
+
+	.testimonial-section > div {
+		max-width: 100%;
+	}
+
+	.testimonial-quote {
+		grid-template-columns: 48px minmax(0, 1fr) 48px;
+		gap: 16px;
 	}
 
 	.quote {
@@ -984,14 +1037,9 @@ h3 {
 		font-size: 12px;
 	}
 
-	.chapter-dot {
-		width: 8px;
-		height: 8px;
-	}
-
-	.progress-nav a.active .chapter-dot {
-		width: 14px;
-		height: 14px;
+	:root {
+		--chapter-dot-size: 8px;
+		--chapter-dot-active-size: 14px;
 	}
 
 	.model-figure {
@@ -1026,8 +1074,13 @@ h3 {
 	}
 
 	.testimonial-section {
+		padding-left: 0;
+		padding-right: 0;
+	}
+
+	.testimonial-quote {
 		grid-template-columns: 1fr;
-		gap: 12px;
+		gap: 8px;
 	}
 
 	.quote-right {
@@ -1042,6 +1095,11 @@ h3 {
 	.experience-section h2::before {
 		display: block;
 		margin: 0 0 18px 70px;
+	}
+
+	.experience-section h2::after {
+		display: block;
+		margin: -24px 0 18px 130px;
 	}
 
 	.contact-section {

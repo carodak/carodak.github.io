@@ -24,7 +24,7 @@ const baseCopy = {
 		heading: 'I want to develop\ntechnology with insight\nand intention.',
 		callout: "Don't you want\nto know more",
 		body:
-			'I am <i>Carodak</i>, a Computer Scientist, writer and designer. Computer science fills my brain while writing keeps the story alive. I like making systems that feel clear, useful, and a little more human.',
+			'I am <i>Carodak</i>, a computer scientist by training, and a writer and designer in my spare time. Computer science gives structure to my thinking, writing opens it up, and design lets me bring the two together to create technology projects that can have a tangible impact on people’s well-being.',
 		link: 'About ->',
 	},
 	projects: {
@@ -47,24 +47,23 @@ const baseCopy = {
 	testimonial: {
 		heading: 'Apparently, I am\nfun to work with!',
 		body:
-			'C has an amazing ability to bring clarity and life to ambitious ideas, turning them into beneficial products. She is highly resourceful and well-connected in her field, always knowing the right person to get things done efficiently.',
+			"<i>C. was our first point of contact for client support. Throughout her mandate, she delivered high-quality work. She demonstrated rigor, reliability, and great efficiency in carrying out her various responsibilities. I would not hesitate to entrust her with another mandate in an equivalent or higher-level position in the future. Annie Legault, Administrative Services Manager, Residences de l'Université de Montréal.</i>",
 	},
 	experience: {
-		eyebrow: 'I am a current I.T.M mindset\nstudent @ UQAM, College Park',
+		eyebrow: 'I am a current Software Developer\n @ Douglas Mental Health Institute, Quebec, Canada.',
 		heading: "Where\nI've been",
 		cta: 'View Resume',
 		items: [
-			{ place: 'The Peaces Collective', role: 'Design intern', date: 'Summer 2025' },
-			{ place: 'Speakaboo (Benvsion)', role: 'UX Research - App prototype', date: 'March 2025' },
-			{ place: 'SuperReply', role: 'Product Designer', date: 'May 2024' },
-			{ place: 'IQVIA', role: 'Associate Software Developer', date: '2022 - 2024' },
+			{ place: 'Douglas Mental Health Institute', role: 'Software Developer', date: '2020 - Present' },
+			{ place: 'University of Montreal', role: 'Computer Science (AI) Master Student, AI prediction, VR development', date: '2018-2020' },
+			{ place: 'LIRMM (Montpellier, France)', role: 'Student Trainee, AI prediction', date: 'July 2027' },
 		],
 	},
 	contact: {
 		teaser: 'Still here?',
 		heading: 'Work with',
 		headingEmphasis: 'me.',
-		email: 'hello@example.com',
+		email: 'codeofcaro@gmail.com',
 	},
 	pages: {
 		about: {
