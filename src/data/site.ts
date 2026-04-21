@@ -1014,7 +1014,7 @@ const baseCopy = {
 						{
 							title: 'Making interactions feel musical',
 							description:
-								'One challenge was making physical interactions such as grabbing, shaking, poking, and looking feel naturally connected to sound generation.',
+								'Making physical interactions such as grabbing, shaking, poking, and looking feel naturally connected to sound generation.',
 						},
 						{
 							title: 'Harmonizing sound and visuals',

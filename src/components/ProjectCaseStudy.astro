@@ -1,5 +1,4 @@
 ---
-import ProgressNav from './ProgressNav.astro';
 import { localizedPath, type Language } from '../data/site';
 
 interface Props {
@@ -62,12 +61,17 @@ const getYouTubeEmbedUrl = (src = '') => {
 	const id = match?.[1];
 	return id ? `https://www.youtube.com/embed/${id}?rel=0&playsinline=1` : '';
 };
+const getVideoPosterUrl = (src = '') => src.replace(/\.(mp4|webm|mov)$/i, '-poster.jpg');
 ---
 
-<ProgressNav language={language} isHome={false} />
-
 <aside class="case-side-nav" aria-label="Project navigation">
-	<p>Projects</p>
+	<button class="case-side-toggle" type="button" aria-expanded="false" aria-label="Show project navigation" data-case-side-toggle>
+		<span aria-hidden="true"></span>
+	</button>
+	<button class="case-side-back-button" type="button" aria-label="Back" data-case-side-back>
+		<span aria-hidden="true"></span>
+	</button>
+	<p data-case-side-title>Projects</p>
 	<div class="case-side-filters">
 		{copy.projects.filters.map((filter) => (
 			<button
@@ -81,7 +85,11 @@ const getYouTubeEmbedUrl = (src = '') => {
 	</div>
 	{
 		copy.projects.filters.map((filter) => (
-			<div class:list={['case-side-projects', filter !== activeMenuFilter && 'is-hidden']} data-case-project-group={filter}>
+			<div
+				class:list={['case-side-projects', filter !== activeMenuFilter && 'is-hidden']}
+				data-case-project-group={filter}
+				hidden={filter !== activeMenuFilter}
+			>
 				{projects
 					.filter((item) => item.categories.includes(filter))
 					.map((item) => (
@@ -128,7 +136,9 @@ const getYouTubeEmbedUrl = (src = '') => {
 											allowfullscreen
 										></iframe>
 									) : item.type === 'video' ? (
-										<video class="project-preview-media" src={item.src} autoplay muted loop playsinline />
+										<video class="project-preview-media" preload="none" playsinline controls poster={getVideoPosterUrl(item.src)} aria-label={item.label}>
+											<source src={item.src} type="video/mp4" />
+										</video>
 									) : (
 										<img class="project-preview-media" src={item.src} alt={item.label} loading={index === 0 ? 'eager' : 'lazy'} />
 									)
@@ -287,12 +297,22 @@ const getYouTubeEmbedUrl = (src = '') => {
 	}
 </main>
 
-<script>
+<script data-astro-rerun>
+	(() => {
+	window.__carodakCaseController?.abort();
+	window.__carodakCaseController = new AbortController();
+	const caseSignal = window.__carodakCaseController.signal;
 	const visualTrack = document.querySelector('[data-case-visual-track]');
 	const visualPrev = document.querySelector('[data-case-visual-prev]');
 	const visualNext = document.querySelector('[data-case-visual-next]');
+	const caseSideNav = document.querySelector('.case-side-nav');
+	const caseSideToggle = document.querySelector('[data-case-side-toggle]');
+	const caseSideBack = document.querySelector('[data-case-side-back]');
+	const caseSideTitle = document.querySelector('[data-case-side-title]');
 	const caseProjectFilters = Array.from(document.querySelectorAll('[data-case-project-filter]'));
 	const caseProjectGroups = Array.from(document.querySelectorAll('[data-case-project-group]'));
+	let caseNavStep = 'closed';
+	let activeCaseFilter = caseProjectFilters.find((button) => button.classList.contains('active'))?.getAttribute('data-case-project-filter') || 'Featured';
 
 	const scrollVisual = (direction) => {
 		if (!visualTrack) return;
@@ -309,17 +329,56 @@ const getYouTubeEmbedUrl = (src = '') => {
 		});
 	};
 
-	visualPrev?.addEventListener('click', () => scrollVisual(-1));
-	visualNext?.addEventListener('click', () => scrollVisual(1));
+	visualPrev?.addEventListener('click', () => scrollVisual(-1), { signal: caseSignal });
+	visualNext?.addEventListener('click', () => scrollVisual(1), { signal: caseSignal });
+
+	const setCaseNavStep = (step) => {
+		caseNavStep = step;
+		const isOpen = step !== 'closed';
+		const isCategoryStep = step === 'categories';
+		const isProjectStep = step === 'projects';
+
+		caseSideToggle?.setAttribute('aria-expanded', String(isOpen));
+		caseSideToggle?.setAttribute('aria-label', isOpen ? 'Hide project navigation' : 'Show project navigation');
+		caseSideNav?.classList.toggle('is-category-step', isCategoryStep);
+		caseSideNav?.classList.toggle('is-project-step', isProjectStep);
+		caseSideNav?.classList.toggle('is-expanded', isOpen);
+
+		if (caseSideTitle) {
+			caseSideTitle.textContent = isProjectStep ? activeCaseFilter : isCategoryStep ? 'Categories' : 'Projects';
+		}
+	};
+
+	const syncCaseProjectGroups = (filter) => {
+		activeCaseFilter = filter;
+		caseProjectFilters.forEach((item) => {
+			item.classList.toggle('active', item.getAttribute('data-case-project-filter') === filter);
+		});
+		caseProjectGroups.forEach((group) => {
+			const isActiveGroup = group.getAttribute('data-case-project-group') === filter;
+			group.classList.toggle('is-hidden', !isActiveGroup);
+			group.hidden = !isActiveGroup;
+		});
+	};
+
+	syncCaseProjectGroups(activeCaseFilter);
+	setCaseNavStep('closed');
+
+	caseSideToggle?.addEventListener('click', () => {
+		setCaseNavStep(caseNavStep === 'closed' ? 'categories' : 'closed');
+	}, { signal: caseSignal });
+
+	caseSideBack?.addEventListener('click', () => {
+		setCaseNavStep(caseNavStep === 'projects' ? 'categories' : 'closed');
+	}, { signal: caseSignal });
 
 	caseProjectFilters.forEach((button) => {
 		button.addEventListener('click', () => {
 			const filter = button.getAttribute('data-case-project-filter') || 'Featured';
 
-			caseProjectFilters.forEach((item) => item.classList.toggle('active', item === button));
-			caseProjectGroups.forEach((group) => {
-				group.classList.toggle('is-hidden', group.getAttribute('data-case-project-group') !== filter);
-			});
-		});
+			syncCaseProjectGroups(filter);
+			setCaseNavStep('projects');
+		}, { signal: caseSignal });
 	});
+	})();
 </script>

@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import ProgressNav from '../../components/ProgressNav.astro';
 import { getCopy } from '../../data/site';
 
 const language = 'fr';
@@ -8,7 +7,6 @@ const copy = getCopy(language);
 ---
 
 <BaseLayout title={`${copy.pages.about.title} - ${copy.name}`} description={copy.description} language={language} path="/about/">
-	<ProgressNav language={language} isHome={false} />
 	<main class="about-page">
 		<a class="case-back about-back" href="/fr/">
 			<span aria-hidden="true"></span>

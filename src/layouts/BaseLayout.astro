@@ -2,6 +2,7 @@
 import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 import { defaultLanguage, languages, localizedPath, type Language } from '../data/site';
+import ProgressNav from '../components/ProgressNav.astro';
 
 interface Props {
 	title: string;
@@ -48,7 +49,7 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 					<img class="brand-house" src="/logo.png" alt="" aria-hidden="true" />
 					<span>CARODAK</span>
 				</a>
-				<div class="audio-control" transition:persist>
+				<div class="audio-control">
 					<button class="audio-toggle" type="button" aria-pressed="false" data-audio-toggle>
 						<span class="audio-toggle-dot" aria-hidden="true"></span>
 						<span data-audio-toggle-label>Sound</span>
@@ -79,7 +80,7 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 				}
 			</nav>
 		</header>
-		<div class="page-transition" aria-hidden="true" data-page-transition></div>
+		<ProgressNav language={language} isHome={path === '/'} />
 		<slot />
 		<footer class="site-footer">
 			<p>
@@ -99,24 +100,71 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 				<a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noreferrer">Attribution 3.0</a>.
 			</p>
 		</footer>
-		<audio controls transition:persist data-background-audio src="/music/703713__zhr__chill-background-music-2.wav" loop autoplay preload="auto"></audio>
-		<script>
-			const audio = document.querySelector('[data-background-audio]');
+		<audio controls transition:persist transition:name="background-audio" data-background-audio src="/music/703713__zhr__chill-background-music-2.wav" loop preload="auto"></audio>
+		<script data-astro-rerun>
+			(() => {
+			window.__carodakBaseController?.abort();
+			window.__carodakBaseController = new AbortController();
+			const baseSignal = window.__carodakBaseController.signal;
+			const allBackgroundAudios = Array.from(document.querySelectorAll('[data-background-audio]'));
+			const audio = window.__carodakBackgroundAudio && document.contains(window.__carodakBackgroundAudio)
+				? window.__carodakBackgroundAudio
+				: allBackgroundAudios[0];
+			window.__carodakBackgroundAudio = audio;
+			allBackgroundAudios.forEach((item) => {
+				if (item === audio) return;
+				item.pause();
+				item.removeAttribute('src');
+				item.load();
+				item.remove();
+			});
 			const audioToggle = document.querySelector('[data-audio-toggle]');
 			const audioToggleLabel = document.querySelector('[data-audio-toggle-label]');
 			const audioVolumeToggle = document.querySelector('[data-audio-volume-toggle]');
 			const audioVolume = document.querySelector('[data-audio-volume]');
 			const audioVolumePanel = document.querySelector('.audio-volume');
 			const audioHint = document.querySelector('[data-audio-hint]');
-			const pageTransition = document.querySelector('[data-page-transition]');
 			const audioPreferenceKey = 'carodak-background-audio';
 			const audioVolumeKey = 'carodak-background-audio-volume';
 			const audioTimeKey = 'carodak-background-audio-time';
 			let hasTriedInteractionStart = false;
-			let isPageTransitioning = false;
 			const audioPreference = window.sessionStorage.getItem(audioPreferenceKey);
 
-			pageTransition?.classList.remove('is-leaving');
+			const resetRouteMenus = () => {
+				const keepLast = (selector) => {
+					const elements = Array.from(document.querySelectorAll(selector));
+					const current = elements.at(-1);
+					elements.slice(0, -1).forEach((element) => {
+						element.hidden = true;
+						element.remove();
+					});
+					if (current) current.hidden = false;
+					return current;
+				};
+
+				const progressNav = keepLast('.progress-nav');
+				const caseSideNav = keepLast('.case-side-nav');
+
+				if (!progressNav) {
+					window.__carodakProgressController?.abort();
+					window.__carodakProgressController = null;
+				}
+				if (!caseSideNav) {
+					window.__carodakCaseController?.abort();
+					window.__carodakCaseController = null;
+				}
+			};
+
+			const removeRouteMenusBeforeSwap = () => {
+				window.__carodakProgressController?.abort();
+				window.__carodakProgressController = null;
+				window.__carodakCaseController?.abort();
+				window.__carodakCaseController = null;
+				document.querySelectorAll('.progress-nav, .case-side-nav').forEach((element) => {
+					element.hidden = true;
+					element.remove();
+				});
+			};
 
 			const updateAudioToggle = (isPlaying) => {
 				audioToggle?.setAttribute('aria-pressed', String(isPlaying));
@@ -128,11 +176,14 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 
 			const getStoredVolume = () => {
 				const storedVolume = Number(window.localStorage.getItem(audioVolumeKey));
-				return Number.isFinite(storedVolume) ? Math.max(0, Math.min(storedVolume, 1)) : 1;
+				return Number.isFinite(storedVolume) && storedVolume > 0 ? Math.max(0, Math.min(storedVolume, 1)) : 1;
 			};
 
 			const setAudioVolume = (volume) => {
 				if (!audio) return;
+				audio.muted = false;
+				audio.defaultMuted = false;
+				audio.defaultVolume = 1;
 				audio.volume = volume;
 				if (audioVolume) {
 					audioVolume.value = String(Math.round(volume * 100));
@@ -147,6 +198,7 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 
 			const restoreAudioTime = () => {
 				if (!audio) return;
+				if (audio.currentTime > 0) return;
 				const storedTime = Number(window.sessionStorage.getItem(audioTimeKey));
 				if (!Number.isFinite(storedTime) || storedTime <= 0) return;
 
@@ -194,80 +246,43 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 					window.sessionStorage.setItem(audioPreferenceKey, 'off');
 					updateAudioToggle(false);
 				}
-			});
+			}, { signal: baseSignal });
 
 			audioVolume?.addEventListener('input', () => {
 				const volume = Number(audioVolume.value) / 100;
 				window.localStorage.setItem(audioVolumeKey, String(volume));
 				setAudioVolume(volume);
-			});
+			}, { signal: baseSignal });
 
 			audioVolumeToggle?.addEventListener('click', () => {
 				const isOpen = audioVolumeToggle.getAttribute('aria-expanded') === 'true';
 				audioVolumeToggle.setAttribute('aria-expanded', String(!isOpen));
 				audioVolumeToggle.classList.toggle('is-open', !isOpen);
 				audioVolumePanel?.classList.toggle('is-open', !isOpen);
-			});
-
-			const shouldTransitionLink = (link, event) => {
-				if (isPageTransitioning) return false;
-				if (!link || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false;
-				if (link.target || link.hasAttribute('download')) return false;
-
-				const href = link.getAttribute('href') || '';
-				if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return false;
-
-				const url = new URL(href, window.location.href);
-				if (url.origin !== window.location.origin) return false;
-
-				const normalizePath = (path) => path.replace(/\/index\.html$/, '/').replace(/\/$/, '') || '/';
-				const currentPath = normalizePath(window.location.pathname);
-				const nextPath = normalizePath(url.pathname);
-				const sameDocument = currentPath === nextPath && url.search === window.location.search;
-
-				if (sameDocument) return false;
-
-				return url.href !== window.location.href;
-			};
-
-			document.addEventListener('click', (event) => {
-				const link = event.target?.closest?.('a');
-				if (!shouldTransitionLink(link, event)) return;
-
-				event.preventDefault();
-				isPageTransitioning = true;
-				saveAudioTime();
-				pageTransition?.classList.add('is-leaving');
-				window.setTimeout(() => {
-					window.location.href = link.href;
-				}, 520);
-			});
+			}, { signal: baseSignal });
 
 			setAudioVolume(getStoredVolume());
 			restoreAudioTime();
 			if (audioPreference !== 'off') {
 				playAudio();
 			}
-			window.addEventListener('pointerdown', tryStartAfterInteraction, { once: true });
-			window.addEventListener('keydown', tryStartAfterInteraction, { once: true });
-			window.addEventListener('wheel', tryStartAfterInteraction, { once: true, passive: true });
+			window.addEventListener('pointerdown', tryStartAfterInteraction, { once: true, signal: baseSignal });
+			window.addEventListener('keydown', tryStartAfterInteraction, { once: true, signal: baseSignal });
+			window.addEventListener('wheel', tryStartAfterInteraction, { once: true, passive: true, signal: baseSignal });
 			document.addEventListener('carodak:model-loaded', () => {
 				audioHint?.classList.add('is-visible');
 				audioHint?.setAttribute('aria-hidden', 'false');
-			});
+			}, { signal: baseSignal });
 			document.addEventListener('carodak:model-hidden', () => {
 				audioHint?.classList.remove('is-visible');
 				audioHint?.setAttribute('aria-hidden', 'true');
-			});
-			window.addEventListener('beforeunload', saveAudioTime);
-			window.addEventListener('pagehide', saveAudioTime);
-			pageTransition?.addEventListener('animationend', () => {
-				pageTransition.classList.remove('is-leaving');
-			});
-			window.addEventListener('pageshow', () => {
-				pageTransition?.classList.remove('is-leaving');
-				isPageTransitioning = false;
-			});
+			}, { signal: baseSignal });
+			document.addEventListener('astro:page-load', resetRouteMenus, { signal: baseSignal });
+			document.addEventListener('astro:before-swap', removeRouteMenusBeforeSwap, { signal: baseSignal });
+			resetRouteMenus();
+			window.addEventListener('beforeunload', saveAudioTime, { signal: baseSignal });
+			window.addEventListener('pagehide', saveAudioTime, { signal: baseSignal });
+			})();
 		</script>
 	</body>
 </html>

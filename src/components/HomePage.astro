@@ -1,6 +1,5 @@
 ---
 import HeroModel from './HeroModel.astro';
-import ProgressNav from './ProgressNav.astro';
 import { getCopy, localizedPath, type Language } from '../data/site';
 
 interface Props {
@@ -20,11 +19,10 @@ const experienceHeadingLines = copy.experience.heading.split('\n');
 const getYouTubeEmbedUrl = (src = '') => {
 	const match = src.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/);
 	const id = match?.[1];
-	return id ? `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&rel=0&playsinline=1` : '';
+	return id ? `https://www.youtube.com/embed/${id}?rel=0&playsinline=1` : '';
 };
+const getVideoPosterUrl = (src = '') => src.replace(/\.(mp4|webm|mov)$/i, '-poster.jpg');
 ---
-
-<ProgressNav language={language} />
 
 <main class="home-page">
 	<section class="hero-section">
@@ -140,7 +138,9 @@ const getYouTubeEmbedUrl = (src = '') => {
 												allow="autoplay; encrypted-media; picture-in-picture"
 											></iframe>
 										) : projectPreview.type === 'video' ? (
-											<video class="project-preview-media" src={projectPreview.src} autoplay muted loop playsinline />
+											<video class="project-preview-media" preload="none" playsinline poster={getVideoPosterUrl(projectPreview.src)} aria-label={projectPreview.label}>
+												<source src={projectPreview.src} type="video/mp4" />
+											</video>
 										) : (
 											<img class="project-preview-media" src={projectPreview.src} alt="" loading="lazy" />
 										)
@@ -222,7 +222,11 @@ const getYouTubeEmbedUrl = (src = '') => {
 	</section>
 </main>
 
-<script>
+<script data-astro-rerun>
+	(() => {
+	window.__carodakHomeController?.abort();
+	window.__carodakHomeController = new AbortController();
+	const homeSignal = window.__carodakHomeController.signal;
 	const filterButtons = Array.from(document.querySelectorAll('[data-project-filter]'));
 	const filterToggle = document.querySelector('[data-project-filter-toggle]');
 	const extraFilters = Array.from(document.querySelectorAll('.project-filter-extra'));
@@ -306,7 +310,7 @@ const getYouTubeEmbedUrl = (src = '') => {
 		extraFilters.forEach((button) => {
 			button.hidden = isExpanded;
 		});
-	});
+	}, { signal: homeSignal });
 
 	filterButtons.forEach((button) => {
 		button.addEventListener('click', () => {
@@ -321,11 +325,11 @@ const getYouTubeEmbedUrl = (src = '') => {
 			});
 
 			updateProjectCarousel(1);
-		});
+		}, { signal: homeSignal });
 	});
 
-	projectPrev?.addEventListener('click', () => goToProject(activeProjectIndex - 1));
-	projectNext?.addEventListener('click', () => goToProject(activeProjectIndex + 1));
+	projectPrev?.addEventListener('click', () => goToProject(activeProjectIndex - 1), { signal: homeSignal });
+	projectNext?.addEventListener('click', () => goToProject(activeProjectIndex + 1), { signal: homeSignal });
 
 	document.querySelector('[data-contact-form]')?.addEventListener('submit', (event) => {
 		event.preventDefault();
@@ -345,7 +349,7 @@ const getYouTubeEmbedUrl = (src = '') => {
 		].filter(Boolean).join('\n');
 
 		window.location.href = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-	});
+	}, { signal: homeSignal });
 
 	projectsSection?.addEventListener(
 		'wheel',
@@ -384,8 +388,9 @@ const getYouTubeEmbedUrl = (src = '') => {
 				}, 360);
 			}
 		},
-		{ passive: false },
+		{ passive: false, signal: homeSignal },
 	);
 
 	updateProjectCarousel();
+	})();
 </script>

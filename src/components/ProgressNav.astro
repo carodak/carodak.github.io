@@ -12,6 +12,8 @@ const sectionHref = (id: string) => {
 	if (isHome) return `#${id}`;
 	return `${localizedPath(language, '/')}#${id}`;
 };
+
+const chapterHref = (chapter) => chapter.kind === 'page' ? localizedPath(language, chapter.path) : sectionHref(chapter.id);
 ---
 
 <aside class="progress-nav" aria-label="Page chapters">
@@ -20,12 +22,15 @@ const sectionHref = (id: string) => {
 			chapterNav.map((chapter) => (
 				<li>
 					<a
-						href={chapter.kind === 'page' ? localizedPath(language, chapter.path) : sectionHref(chapter.id)}
+						href={chapterHref(chapter)}
+						title={`${chapter.prefix}: ${chapter.label}`}
+						aria-label={`${chapter.prefix}: ${chapter.label}`}
 						data-chapter-link={chapter.id}
 						data-chapter-kind={chapter.kind}
+						data-chapter-path={chapter.kind === 'page' ? chapterHref(chapter) : ''}
 					>
 						<span class="chapter-dot" aria-hidden="true"></span>
-						<span>{chapter.prefix}: {chapter.label}</span>
+						<span class="chapter-label">{chapter.prefix}: {chapter.label}</span>
 					</a>
 				</li>
 			))
@@ -33,8 +38,26 @@ const sectionHref = (id: string) => {
 	</ol>
 </aside>
 
-<script>
-	const links = Array.from(document.querySelectorAll('[data-chapter-link]'));
+<script data-astro-rerun>
+	(() => {
+	window.__carodakProgressController?.abort();
+	window.__carodakProgressController = new AbortController();
+	const progressSignal = window.__carodakProgressController.signal;
+	const currentScript = document.currentScript;
+	const currentProgressNav = currentScript?.previousElementSibling?.matches?.('.progress-nav')
+		? currentScript.previousElementSibling
+		: Array.from(document.querySelectorAll('.progress-nav')).at(-1);
+
+	Array.from(document.querySelectorAll('.progress-nav')).forEach((nav) => {
+		const isCurrent = nav === currentProgressNav;
+		nav.toggleAttribute('hidden', !isCurrent);
+		nav.toggleAttribute('data-current-progress-nav', isCurrent);
+		if (!isCurrent) nav.remove();
+	});
+
+	if (!currentProgressNav) return;
+
+	const links = Array.from(currentProgressNav.querySelectorAll('[data-chapter-link]'));
 	const sections = links
 		.filter((link) => link.getAttribute('data-chapter-kind') === 'section')
 		.map((link) => document.getElementById(link.getAttribute('data-chapter-link') || ''))
@@ -42,14 +65,38 @@ const sectionHref = (id: string) => {
 
 	const setActive = (id) => {
 		links.forEach((link) => {
-			const isSection = link.getAttribute('data-chapter-kind') === 'section';
-			link.classList.toggle('active', isSection && link.getAttribute('data-chapter-link') === id);
+			link.classList.toggle('active', link.getAttribute('data-chapter-link') === id);
 		});
 	};
 
+	const normalizePath = (path) => {
+		const normalized = path.replace(/\/+$/, '');
+		return normalized || '/';
+	};
+
+	const getPageChapterId = () => {
+		const currentPath = normalizePath(window.location.pathname);
+		if (currentPath.includes('/projects/')) return 'projects';
+
+		const currentPageLink = links.find((link) => {
+			if (link.getAttribute('data-chapter-kind') !== 'page') return false;
+			const href = link.getAttribute('href') || '';
+			const linkPath = normalizePath(new URL(href, window.location.origin).pathname);
+			return linkPath === currentPath;
+		});
+
+		return currentPageLink?.getAttribute('data-chapter-link') || null;
+	};
+
 	const updateActiveSection = () => {
+		const pageChapterId = getPageChapterId();
+		if (pageChapterId && !sections.length) {
+			setActive(pageChapterId);
+			return;
+		}
+
 		if (window.scrollY < 80) {
-			setActive(null);
+			setActive(pageChapterId);
 			return;
 		}
 
@@ -59,7 +106,11 @@ const sectionHref = (id: string) => {
 			return rect.top <= markerY && rect.bottom >= markerY;
 		});
 
-		if (activeSection) setActive(activeSection.id);
+		if (activeSection) {
+			setActive(activeSection.id);
+		} else {
+			setActive(pageChapterId);
+		}
 	};
 
 	const observer = new IntersectionObserver(
@@ -75,6 +126,8 @@ const sectionHref = (id: string) => {
 
 	sections.forEach((section) => observer.observe(section));
 	updateActiveSection();
-	window.addEventListener('scroll', updateActiveSection, { passive: true });
-	window.addEventListener('resize', updateActiveSection);
+	progressSignal.addEventListener('abort', () => observer.disconnect(), { once: true });
+	window.addEventListener('scroll', updateActiveSection, { passive: true, signal: progressSignal });
+	window.addEventListener('resize', updateActiveSection, { signal: progressSignal });
+	})();
 </script>

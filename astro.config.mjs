@@ -1,6 +1,17 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import { fileURLToPath } from 'node:url';
 
+// https://astro.build/config
 export default defineConfig({
-  site: 'https://carodak.github.io',
+	vite: {
+		resolve: {
+			alias: {
+				'astro/entrypoints/prerender': fileURLToPath(
+					new URL('./node_modules/astro/dist/entrypoints/prerender.js', import.meta.url),
+				),
+			},
+		},
+	},
+	site: 'https://carodak.github.io',
 });
