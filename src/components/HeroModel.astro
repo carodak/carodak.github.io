@@ -29,167 +29,248 @@ const { label } = Astro.props;
 		</span>
 	</div>
 	<div class="model-filter-wipe" aria-hidden="true"></div>
+	<audio data-model-swipe-audio src="/music/463564__djfroyd__wn-swipe-7bars.wav" preload="auto"></audio>
 </div>
 
 <script type="module" src="/model-viewer.min.js"></script>
-<script>
-	const hero = document.querySelector('.hero-section');
-	const modelStage = document.querySelector('.model-stage');
-	const modelViewer = document.querySelector('.avatar-model');
-	const modelLoader = document.querySelector('.model-loader');
-	const modelLoaderBar = document.querySelector('.model-loader-bar');
-	const modelFilterWipe = document.querySelector('.model-filter-wipe');
-	const scrollCue = document.querySelector('.scroll-cue');
+<script is:inline>
+	(() => {
+		let heroModelController;
 
-	let ticking = false;
-	let currentProgress = 0;
-	let targetProgress = 0;
-	let introZoomPulse = 0;
-	let introZoomPlayed = false;
-	let introZoomReleased = false;
-	let introZoomHeld = false;
-	let introWheelProgress = 0;
-	let cueScrollPending = false;
-	const introWheelThreshold = 900;
+		const initHeroModel = () => {
+			heroModelController?.abort();
+			heroModelController = new AbortController();
+			const { signal } = heroModelController;
 
-	const updateModelZoom = () => {
-		if (!hero || !modelStage) return;
+			const hero = document.querySelector('.hero-section');
+			const modelStage = document.querySelector('.model-stage');
+			const modelViewer = document.querySelector('.avatar-model');
+			const modelLoader = document.querySelector('.model-loader');
+			const modelLoaderBar = document.querySelector('.model-loader-bar');
+			const modelFilterWipe = document.querySelector('.model-filter-wipe');
+			const modelSwipeAudio = document.querySelector('[data-model-swipe-audio]');
+			const scrollCue = document.querySelector('.scroll-cue');
 
-		const rect = hero.getBoundingClientRect();
-		const viewportHeight = window.innerHeight || 1;
-		const scrollProgress = Math.min(1, Math.max(0, -rect.top / viewportHeight));
-		const heroStillVisible = rect.bottom > viewportHeight * 0.18;
-		const heldProgress = introZoomHeld && heroStillVisible ? 0.32 : 0;
-		targetProgress = Math.max(scrollProgress * 0.45, introZoomPulse);
-		targetProgress = Math.max(targetProgress, heldProgress);
-		currentProgress += (targetProgress - currentProgress) * 0.12;
+			if (!modelStage || !modelViewer) return;
 
-		const easedProgress = 1 - Math.pow(1 - currentProgress, 3);
-		const fieldOfView = 28 - easedProgress * 11;
-		const cameraDistance = 3.2 - easedProgress * 0.9;
-		const opacity = 1 - easedProgress * 0.1;
+			const isHomePage = () => document.body.classList.contains('is-home');
+			const modelLoadedKey = 'carodak-hero-model-loaded';
 
-		modelStage.style.setProperty('--model-scroll-opacity', String(opacity));
-		modelViewer?.setAttribute('field-of-view', `${fieldOfView}deg`);
-		modelViewer?.setAttribute('camera-orbit', `0deg 75deg ${cameraDistance}m`);
+			let ticking = false;
+			let currentProgress = 0;
+			let targetProgress = 0;
+			let introZoomPulse = 0;
+			let introZoomPlayed = false;
+			let introZoomReleased = false;
+			let introZoomHeld = false;
+			let introWheelProgress = 0;
+			let cueScrollPending = false;
+			let modelFullyHidden = false;
+			let modelLoaded = window.sessionStorage.getItem(modelLoadedKey) === 'true';
+			const introWheelThreshold = 900;
 
-		if (Math.abs(targetProgress - currentProgress) > 0.001) {
-			window.requestAnimationFrame(updateModelZoom);
-			return;
-		}
+			const markModelLoaded = () => {
+				modelLoaderBar?.style.setProperty('--model-load-progress', '100%');
+				modelLoader?.classList.add('is-loaded');
+				modelLoaded = true;
+				window.sessionStorage.setItem(modelLoadedKey, 'true');
+				document.dispatchEvent(new CustomEvent('carodak:model-loaded'));
+			};
 
-		ticking = false;
-	};
+			const syncModelLoadedState = () => {
+				if (modelLoaded || modelViewer.loaded) {
+					markModelLoaded();
+				}
+			};
 
-	const triggerFilterWipe = () => {
-		if (!modelFilterWipe || !modelStage) return;
+			const updateModelZoom = () => {
+				if (!isHomePage()) return;
+				if (!hero || !modelStage) return;
 
-		modelStage.classList.add('is-filter-wiping');
-		modelFilterWipe.classList.remove('is-active');
-		void modelFilterWipe.offsetWidth;
-		modelFilterWipe.classList.add('is-active');
+				const rect = hero.getBoundingClientRect();
+				const viewportHeight = window.innerHeight || 1;
+				const scrollProgress = Math.min(1, Math.max(0, -rect.top / viewportHeight));
+				const heroStillVisible = rect.bottom > viewportHeight * 0.18;
+				const heldProgress = introZoomHeld && heroStillVisible ? 0.32 : 0;
 
-		window.setTimeout(() => {
-			introZoomReleased = true;
-			if (cueScrollPending) {
-				cueScrollPending = false;
-				document.getElementById('intro')?.scrollIntoView({ behavior: 'smooth' });
-			}
-		}, 620);
+				targetProgress = Math.max(scrollProgress * 0.45, introZoomPulse);
+				targetProgress = Math.max(targetProgress, heldProgress);
+				currentProgress += (targetProgress - currentProgress) * 0.12;
 
-		window.setTimeout(() => {
-			modelFilterWipe.classList.remove('is-active');
-		}, 1100);
-	};
+				const easedProgress = 1 - Math.pow(1 - currentProgress, 3);
+				const fieldOfView = 28 - easedProgress * 11;
+				const cameraDistance = 3.2 - easedProgress * 0.9;
+				const opacity = 1 - easedProgress * 0.1;
 
-	const requestModelZoomUpdate = () => {
-		if (ticking) return;
-		ticking = true;
-		window.requestAnimationFrame(updateModelZoom);
-	};
+				modelStage.style.setProperty('--model-scroll-opacity', String(opacity));
+				modelViewer.setAttribute('field-of-view', `${fieldOfView}deg`);
+				modelViewer.setAttribute('camera-orbit', `0deg 75deg ${cameraDistance}m`);
 
-	const spendIntroWheel = (delta) => {
-		if (introZoomPlayed || window.scrollY > 4) return;
+				if (Math.abs(targetProgress - currentProgress) > 0.001) {
+					window.requestAnimationFrame(updateModelZoom);
+					return;
+				}
 
-		introWheelProgress = Math.min(introWheelThreshold, introWheelProgress + Math.abs(delta));
-		introZoomPulse = (introWheelProgress / introWheelThreshold) * 0.32;
-		requestModelZoomUpdate();
+				ticking = false;
+			};
 
-		if (introWheelProgress >= introWheelThreshold) {
-			introZoomPlayed = true;
-			introZoomHeld = true;
-			triggerFilterWipe();
-		}
-	};
+			const requestModelZoomUpdate = () => {
+				if (ticking) return;
+				ticking = true;
+				window.requestAnimationFrame(updateModelZoom);
+			};
 
-	const completeIntroSequence = () => {
-		if (introZoomPlayed) return;
+			const triggerFilterWipe = () => {
+				if (!modelFilterWipe || !modelStage) return;
 
-		introWheelProgress = introWheelThreshold;
-		introZoomPulse = 0.32;
-		introZoomPlayed = true;
-		introZoomHeld = true;
-		requestModelZoomUpdate();
-		triggerFilterWipe();
-	};
+				if (modelSwipeAudio) {
+					modelSwipeAudio.currentTime = 0;
+					modelSwipeAudio.volume = 0.72;
+					modelSwipeAudio.play().catch(() => {});
+				}
 
-	const handleInitialWheel = (event) => {
-		if (event.deltaY <= 0 || window.scrollY > 4 || introZoomReleased) return;
+				modelStage.classList.add('is-filter-wiping');
+				modelFilterWipe.classList.remove('is-active');
+				void modelFilterWipe.offsetWidth;
+				modelFilterWipe.classList.add('is-active');
 
-		event.preventDefault();
-		if (!introZoomPlayed) spendIntroWheel(event.deltaY);
-	};
+				window.setTimeout(() => {
+					introZoomReleased = true;
 
-	const handleScrollCueClick = (event) => {
-		if (window.scrollY > 4 || introZoomReleased) return;
+					if (cueScrollPending) {
+						cueScrollPending = false;
+						document.getElementById('intro')?.scrollIntoView({ behavior: 'smooth' });
+					}
+				}, 620);
 
-		event.preventDefault();
-		cueScrollPending = true;
-		completeIntroSequence();
-	};
+				window.setTimeout(() => {
+					modelFilterWipe.classList.remove('is-active');
+				}, 1100);
+			};
 
-	const resetIntroZoomAtTop = () => {
-		if (window.scrollY <= 2) {
-			introZoomPlayed = false;
-			introZoomReleased = false;
-			introZoomHeld = false;
-			introWheelProgress = 0;
-			introZoomPulse = 0;
-			return;
-		}
+			const spendIntroWheel = (delta) => {
+				if (introZoomPlayed || window.scrollY > 4) return;
 
-		const rect = hero?.getBoundingClientRect();
-		if (rect && rect.bottom <= window.innerHeight * 0.18) {
-			introZoomHeld = false;
-			introZoomPulse = 0;
-			modelStage?.classList.remove('is-filter-wiping');
-		}
-	};
+				introWheelProgress = Math.min(introWheelThreshold, introWheelProgress + Math.abs(delta));
+				introZoomPulse = (introWheelProgress / introWheelThreshold) * 0.32;
+				requestModelZoomUpdate();
 
-	updateModelZoom();
-	window.addEventListener(
-		'scroll',
-		() => {
-			requestModelZoomUpdate();
-			resetIntroZoomAtTop();
-		},
-		{ passive: true },
-	);
-	window.addEventListener('resize', requestModelZoomUpdate);
-	window.addEventListener('wheel', handleInitialWheel, { passive: false });
-	scrollCue?.addEventListener('click', handleScrollCueClick);
+				if (introWheelProgress >= introWheelThreshold) {
+					introZoomPlayed = true;
+					introZoomHeld = true;
+					triggerFilterWipe();
+				}
+			};
 
-	modelViewer?.addEventListener('progress', (event) => {
-		const progress = event.detail?.totalProgress ?? 0;
-		modelLoaderBar?.style.setProperty('--model-load-progress', `${Math.round(progress * 100)}%`);
-	});
+			const completeIntroSequence = () => {
+				if (introZoomPlayed) return;
 
-	modelViewer?.addEventListener('load', () => {
-		modelLoaderBar?.style.setProperty('--model-load-progress', '100%');
-		modelLoader?.classList.add('is-loaded');
-	});
+				introWheelProgress = introWheelThreshold;
+				introZoomPulse = 0.32;
+				introZoomPlayed = true;
+				introZoomHeld = true;
+				requestModelZoomUpdate();
+				triggerFilterWipe();
+			};
 
-	modelViewer?.addEventListener('error', () => {
-		modelLoader?.classList.add('has-error');
-	});
+			const handleInitialWheel = (event) => {
+				if (!isHomePage()) return;
+				if (event.deltaY <= 0 || window.scrollY > 4 || introZoomReleased) return;
+
+				event.preventDefault();
+				if (!introZoomPlayed) spendIntroWheel(event.deltaY);
+			};
+
+			const handleScrollCueClick = (event) => {
+				if (!isHomePage()) return;
+				if (window.scrollY > 4 || introZoomReleased) return;
+
+				event.preventDefault();
+				cueScrollPending = true;
+				completeIntroSequence();
+			};
+
+			const resetIntroZoomAtTop = () => {
+				if (!isHomePage()) return;
+
+				if (window.scrollY <= 2) {
+					introZoomPlayed = false;
+					introZoomReleased = false;
+					introZoomHeld = false;
+					introWheelProgress = 0;
+					introZoomPulse = 0;
+					modelFullyHidden = false;
+
+					if (modelLoaded) {
+						document.dispatchEvent(new CustomEvent('carodak:model-loaded'));
+					}
+
+					return;
+				}
+
+				const modelRect = modelStage.getBoundingClientRect();
+
+				if (modelRect.bottom <= 0 && !modelFullyHidden) {
+					modelFullyHidden = true;
+					document.dispatchEvent(new CustomEvent('carodak:model-hidden'));
+				}
+
+				const rect = hero?.getBoundingClientRect();
+
+				if (rect && rect.bottom <= window.innerHeight * 0.18) {
+					introZoomHeld = false;
+					introZoomPulse = 0;
+					modelStage.classList.remove('is-filter-wiping');
+				}
+			};
+
+			window.addEventListener(
+				'scroll',
+				() => {
+					requestModelZoomUpdate();
+					resetIntroZoomAtTop();
+				},
+				{ passive: true, signal },
+			);
+
+			window.addEventListener('resize', requestModelZoomUpdate, { signal });
+			window.addEventListener('wheel', handleInitialWheel, { passive: false, signal });
+			scrollCue?.addEventListener('click', handleScrollCueClick, { signal });
+
+			modelViewer.addEventListener(
+				'progress',
+				(event) => {
+					const progress = event.detail?.totalProgress ?? 0;
+					modelLoaderBar?.style.setProperty('--model-load-progress', `${Math.round(progress * 100)}%`);
+
+					if (progress >= 0.999) {
+						markModelLoaded();
+					}
+				},
+				{ signal },
+			);
+
+			modelViewer.addEventListener('load', markModelLoaded, { signal });
+
+			modelViewer.addEventListener(
+				'error',
+				() => {
+					modelLoader?.classList.add('has-error');
+				},
+				{ signal },
+			);
+
+			syncModelLoadedState();
+			window.requestAnimationFrame(syncModelLoadedState);
+			window.setTimeout(syncModelLoadedState, 250);
+			window.setTimeout(syncModelLoadedState, 1000);
+
+			customElements.whenDefined('model-viewer').then(syncModelLoadedState);
+
+			updateModelZoom();
+		};
+
+		initHeroModel();
+		document.addEventListener('astro:page-load', initHeroModel);
+	})();
 </script>

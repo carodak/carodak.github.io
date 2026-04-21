@@ -520,13 +520,13 @@ const baseCopy = {
 				slug: 'designing-vr-simulation-mri-experience',
 				featuredPosition: 5,
 				categories: ['Featured', 'VR'],
-				year: '2024-2026',
+				year: '2024-2025',
 				title: 'Designing a VR Simulation to Improve the MRI Experience',
 				description:
 					'Mission Control is a VR simulation designed to help participants become familiar with the MRI process and practice staying still through real-time audiovisual feedback.',
 				discipline: 'VR, Serious Games, Healthcare',
 				role: 'Lead VR Developer, Designer',
-				timeline: '2024-2026',
+				timeline: '2024-2025',
 				visual: {
 					title: 'Mission Control',
 					theme: 'dark',
@@ -648,7 +648,7 @@ const baseCopy = {
 					'This project outlines the development of a match-3 puzzle task with a Python tool that automatically generates new solvable puzzles.',
 				discipline: 'Cognitive Tasks, Procedural Generation',
 				role: 'Lead developer',
-				timeline: '2024-2026',
+				timeline: '2024-2025',
 				visual: {
 					title: 'Match-3 Planning Task',
 					theme: 'light',
@@ -783,7 +783,7 @@ const baseCopy = {
 					'We used cybersecurity and business statistics from Statistics Canada, the Government of Canada, and the Ponemon Institute to communicate cybersecurity issues affecting small and medium-sized businesses.',
 				discipline: 'Data Visualization, Cybersecurity',
 				role: 'Data Analyst, Designer',
-				timeline: '2019',
+				timeline: 'A few weeks',
 				visual: {
 					title: 'CyberStats Challenge',
 					theme: 'light',

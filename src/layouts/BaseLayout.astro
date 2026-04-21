@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 import { defaultLanguage, languages, localizedPath, type Language } from '../data/site';
 
@@ -17,6 +18,7 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 <html lang={language}>
 	<head>
 		<meta charset="utf-8" />
+		<ClientRouter />
 		<link rel="icon" type="image/svg+xml" href="/logo.png" />
 		<link rel="icon" href="/logo.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -39,14 +41,14 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>
-	<body>
+	<body class:list={{ 'is-home': path === '/', 'is-not-home': path !== '/' }}>
 		<header class="site-top" aria-label="Site header">
 			<div class="brand-cluster">
 				<a class="brand" href={localizedPath(language, '/')} aria-label="Home">
 					<img class="brand-house" src="/logo.png" alt="" aria-hidden="true" />
 					<span>CARODAK</span>
 				</a>
-				<div class="audio-control">
+				<div class="audio-control" transition:persist>
 					<button class="audio-toggle" type="button" aria-pressed="false" data-audio-toggle>
 						<span class="audio-toggle-dot" aria-hidden="true"></span>
 						<span data-audio-toggle-label>Sound</span>
@@ -58,6 +60,10 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 						<span>Vol</span>
 						<input data-audio-volume type="range" min="0" max="100" value="100" />
 					</label>
+					<div class="audio-hint" aria-hidden="true" data-audio-hint>
+						<span class="audio-hint-arrow" aria-hidden="true"></span>
+						<span>Enable Sound for a better experience.</span>
+					</div>
 				</div>
 			</div>
 			<nav class="language-switch" aria-label="Language">
@@ -73,6 +79,7 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 				}
 			</nav>
 		</header>
+		<div class="page-transition" aria-hidden="true" data-page-transition></div>
 		<slot />
 		<footer class="site-footer">
 			<p>
@@ -86,9 +93,13 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 				<a href="https://freesound.org/s/703713/" target="_blank" rel="noreferrer">"chill background music #2.wav"</a>
 				by ZHRO is licensed under
 				<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">Attribution 4.0</a>.
+				Sound effect:
+				<a href="https://freesound.org/s/463564/" target="_blank" rel="noreferrer">"W.N. SWIPE 7bars.wav"</a>
+				by djfroyd is licensed under
+				<a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noreferrer">Attribution 3.0</a>.
 			</p>
 		</footer>
-		<audio data-background-audio src="/703713__zhr__chill-background-music-2.wav" loop autoplay preload="auto"></audio>
+		<audio controls transition:persist data-background-audio src="/music/703713__zhr__chill-background-music-2.wav" loop autoplay preload="auto"></audio>
 		<script>
 			const audio = document.querySelector('[data-background-audio]');
 			const audioToggle = document.querySelector('[data-audio-toggle]');
@@ -96,10 +107,16 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 			const audioVolumeToggle = document.querySelector('[data-audio-volume-toggle]');
 			const audioVolume = document.querySelector('[data-audio-volume]');
 			const audioVolumePanel = document.querySelector('.audio-volume');
+			const audioHint = document.querySelector('[data-audio-hint]');
+			const pageTransition = document.querySelector('[data-page-transition]');
 			const audioPreferenceKey = 'carodak-background-audio';
 			const audioVolumeKey = 'carodak-background-audio-volume';
+			const audioTimeKey = 'carodak-background-audio-time';
 			let hasTriedInteractionStart = false;
+			let isPageTransitioning = false;
 			const audioPreference = window.sessionStorage.getItem(audioPreferenceKey);
+
+			pageTransition?.classList.remove('is-leaving');
 
 			const updateAudioToggle = (isPlaying) => {
 				audioToggle?.setAttribute('aria-pressed', String(isPlaying));
@@ -123,6 +140,28 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 				}
 			};
 
+			const saveAudioTime = () => {
+				if (!audio || !Number.isFinite(audio.currentTime)) return;
+				window.sessionStorage.setItem(audioTimeKey, String(audio.currentTime));
+			};
+
+			const restoreAudioTime = () => {
+				if (!audio) return;
+				const storedTime = Number(window.sessionStorage.getItem(audioTimeKey));
+				if (!Number.isFinite(storedTime) || storedTime <= 0) return;
+
+				const applyStoredTime = () => {
+					if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
+					audio.currentTime = storedTime % audio.duration;
+				};
+
+				if (audio.readyState >= 1) {
+					applyStoredTime();
+				} else {
+					audio.addEventListener('loadedmetadata', applyStoredTime, { once: true });
+				}
+			};
+
 			const playAudio = async () => {
 				if (!audio) return false;
 				setAudioVolume(getStoredVolume());
@@ -137,8 +176,10 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 				}
 			};
 
-			const tryStartAfterInteraction = () => {
+			const tryStartAfterInteraction = (event) => {
+				if (event?.target?.closest?.('.audio-control')) return;
 				if (hasTriedInteractionStart || window.sessionStorage.getItem(audioPreferenceKey) === 'off') return;
+
 				hasTriedInteractionStart = true;
 				playAudio();
 			};
@@ -168,13 +209,65 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 				audioVolumePanel?.classList.toggle('is-open', !isOpen);
 			});
 
+			const shouldTransitionLink = (link, event) => {
+				if (isPageTransitioning) return false;
+				if (!link || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false;
+				if (link.target || link.hasAttribute('download')) return false;
+
+				const href = link.getAttribute('href') || '';
+				if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return false;
+
+				const url = new URL(href, window.location.href);
+				if (url.origin !== window.location.origin) return false;
+
+				const normalizePath = (path) => path.replace(/\/index\.html$/, '/').replace(/\/$/, '') || '/';
+				const currentPath = normalizePath(window.location.pathname);
+				const nextPath = normalizePath(url.pathname);
+				const sameDocument = currentPath === nextPath && url.search === window.location.search;
+
+				if (sameDocument) return false;
+
+				return url.href !== window.location.href;
+			};
+
+			document.addEventListener('click', (event) => {
+				const link = event.target?.closest?.('a');
+				if (!shouldTransitionLink(link, event)) return;
+
+				event.preventDefault();
+				isPageTransitioning = true;
+				saveAudioTime();
+				pageTransition?.classList.add('is-leaving');
+				window.setTimeout(() => {
+					window.location.href = link.href;
+				}, 520);
+			});
+
 			setAudioVolume(getStoredVolume());
+			restoreAudioTime();
 			if (audioPreference !== 'off') {
 				playAudio();
 			}
 			window.addEventListener('pointerdown', tryStartAfterInteraction, { once: true });
 			window.addEventListener('keydown', tryStartAfterInteraction, { once: true });
 			window.addEventListener('wheel', tryStartAfterInteraction, { once: true, passive: true });
+			document.addEventListener('carodak:model-loaded', () => {
+				audioHint?.classList.add('is-visible');
+				audioHint?.setAttribute('aria-hidden', 'false');
+			});
+			document.addEventListener('carodak:model-hidden', () => {
+				audioHint?.classList.remove('is-visible');
+				audioHint?.setAttribute('aria-hidden', 'true');
+			});
+			window.addEventListener('beforeunload', saveAudioTime);
+			window.addEventListener('pagehide', saveAudioTime);
+			pageTransition?.addEventListener('animationend', () => {
+				pageTransition.classList.remove('is-leaving');
+			});
+			window.addEventListener('pageshow', () => {
+				pageTransition?.classList.remove('is-leaving');
+				isPageTransitioning = false;
+			});
 		</script>
 	</body>
 </html>
