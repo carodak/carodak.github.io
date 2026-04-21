@@ -41,10 +41,25 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 	</head>
 	<body>
 		<header class="site-top" aria-label="Site header">
-			<a class="brand" href={localizedPath(language, '/')} aria-label="Home">
-				<img class="brand-house" src="/logo.png" alt="" aria-hidden="true" />
-				<span>CARODAK</span>
-			</a>
+			<div class="brand-cluster">
+				<a class="brand" href={localizedPath(language, '/')} aria-label="Home">
+					<img class="brand-house" src="/logo.png" alt="" aria-hidden="true" />
+					<span>CARODAK</span>
+				</a>
+				<div class="audio-control">
+					<button class="audio-toggle" type="button" aria-pressed="false" data-audio-toggle>
+						<span class="audio-toggle-dot" aria-hidden="true"></span>
+						<span data-audio-toggle-label>Sound</span>
+					</button>
+					<button class="audio-volume-button" type="button" aria-expanded="false" aria-label="Volume" data-audio-volume-toggle>
+						<span aria-hidden="true"></span>
+					</button>
+					<label class="audio-volume" aria-label="Background music volume">
+						<span>Vol</span>
+						<input data-audio-volume type="range" min="0" max="100" value="100" />
+					</label>
+				</div>
+			</div>
 			<nav class="language-switch" aria-label="Language">
 				{
 					languages.map((item, index) => (
@@ -59,5 +74,107 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 			</nav>
 		</header>
 		<slot />
+		<footer class="site-footer">
+			<p>
+				Website developed by Carodak using Astro (JS). Credits: 3D model
+				<a href="https://skfb.ly/o8wst" target="_blank" rel="noreferrer">"The long drive home"</a>
+				by feas is licensed under
+				<a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">
+					Creative Commons Attribution-ShareAlike
+				</a>.
+				Music:
+				<a href="https://freesound.org/s/703713/" target="_blank" rel="noreferrer">"chill background music #2.wav"</a>
+				by ZHRO is licensed under
+				<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">Attribution 4.0</a>.
+			</p>
+		</footer>
+		<audio data-background-audio src="/703713__zhr__chill-background-music-2.wav" loop autoplay preload="auto"></audio>
+		<script>
+			const audio = document.querySelector('[data-background-audio]');
+			const audioToggle = document.querySelector('[data-audio-toggle]');
+			const audioToggleLabel = document.querySelector('[data-audio-toggle-label]');
+			const audioVolumeToggle = document.querySelector('[data-audio-volume-toggle]');
+			const audioVolume = document.querySelector('[data-audio-volume]');
+			const audioVolumePanel = document.querySelector('.audio-volume');
+			const audioPreferenceKey = 'carodak-background-audio';
+			const audioVolumeKey = 'carodak-background-audio-volume';
+			let hasTriedInteractionStart = false;
+			const audioPreference = window.sessionStorage.getItem(audioPreferenceKey);
+
+			const updateAudioToggle = (isPlaying) => {
+				audioToggle?.setAttribute('aria-pressed', String(isPlaying));
+				audioToggle?.classList.toggle('is-playing', isPlaying);
+				if (audioToggleLabel) {
+					audioToggleLabel.textContent = isPlaying ? 'Mute' : 'Sound';
+				}
+			};
+
+			const getStoredVolume = () => {
+				const storedVolume = Number(window.localStorage.getItem(audioVolumeKey));
+				return Number.isFinite(storedVolume) ? Math.max(0, Math.min(storedVolume, 1)) : 1;
+			};
+
+			const setAudioVolume = (volume) => {
+				if (!audio) return;
+				audio.volume = volume;
+				if (audioVolume) {
+					audioVolume.value = String(Math.round(volume * 100));
+					audioVolume.style.setProperty('--audio-volume-value', `${Math.round(volume * 100)}%`);
+				}
+			};
+
+			const playAudio = async () => {
+				if (!audio) return false;
+				setAudioVolume(getStoredVolume());
+				try {
+					await audio.play();
+					window.sessionStorage.setItem(audioPreferenceKey, 'on');
+					updateAudioToggle(true);
+					return true;
+				} catch {
+					updateAudioToggle(false);
+					return false;
+				}
+			};
+
+			const tryStartAfterInteraction = () => {
+				if (hasTriedInteractionStart || window.sessionStorage.getItem(audioPreferenceKey) === 'off') return;
+				hasTriedInteractionStart = true;
+				playAudio();
+			};
+
+			audioToggle?.addEventListener('click', async () => {
+				if (!audio) return;
+
+				if (audio.paused) {
+					playAudio();
+				} else {
+					audio.pause();
+					window.sessionStorage.setItem(audioPreferenceKey, 'off');
+					updateAudioToggle(false);
+				}
+			});
+
+			audioVolume?.addEventListener('input', () => {
+				const volume = Number(audioVolume.value) / 100;
+				window.localStorage.setItem(audioVolumeKey, String(volume));
+				setAudioVolume(volume);
+			});
+
+			audioVolumeToggle?.addEventListener('click', () => {
+				const isOpen = audioVolumeToggle.getAttribute('aria-expanded') === 'true';
+				audioVolumeToggle.setAttribute('aria-expanded', String(!isOpen));
+				audioVolumeToggle.classList.toggle('is-open', !isOpen);
+				audioVolumePanel?.classList.toggle('is-open', !isOpen);
+			});
+
+			setAudioVolume(getStoredVolume());
+			if (audioPreference !== 'off') {
+				playAudio();
+			}
+			window.addEventListener('pointerdown', tryStartAfterInteraction, { once: true });
+			window.addEventListener('keydown', tryStartAfterInteraction, { once: true });
+			window.addEventListener('wheel', tryStartAfterInteraction, { once: true, passive: true });
+		</script>
 	</body>
 </html>

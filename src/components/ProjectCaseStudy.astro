@@ -30,6 +30,7 @@ const overview = caseStudy.overview ?? [
 	{ label: 'Timeline', value: project.timeline },
 ];
 const hasText = (value) => typeof value === 'string' && value.trim().length > 0;
+const caseLinks = (caseStudy.links ?? []).filter((link) => hasText(link?.href));
 const getPoints = (item) => (Array.isArray(item?.points) ? item.points.filter(hasText) : []);
 const problem = caseStudy.problem;
 const solution = caseStudy.solution;
@@ -50,8 +51,17 @@ const hasProblem = problem && hasText(problem.title) && hasText(problem.descript
 const hasSolution = solution && hasText(solution.title) && hasText(solution.description);
 const hasTldr = hasProblem || hasSolution;
 const hasProcesses = processItems.some((item) => hasText(item.title) || hasText(item.body));
-const hasChallenges = challenges.some((item) => hasText(item.title) || item.solutions?.some(hasText));
+const getChallengeDetails = (challenge) => [
+	challenge.description,
+	...(challenge.solutions ?? []),
+].filter(hasText);
+const hasChallenges = challenges.some((item) => hasText(item.title) || getChallengeDetails(item).length);
 const hasImpacts = impacts.some((item) => hasText(item.title) || hasText(item.description));
+const getYouTubeEmbedUrl = (src = '') => {
+	const match = src.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/);
+	const id = match?.[1];
+	return id ? `https://www.youtube.com/embed/${id}?rel=0&playsinline=1` : '';
+};
 ---
 
 <ProgressNav language={language} isHome={false} />
@@ -108,7 +118,16 @@ const hasImpacts = impacts.some((item) => hasText(item.title) || hasText(item.de
 						<div class:list={['project-visual', `project-visual-${projectVisual.theme}`]}>
 							{
 								item?.src ? (
-									item.type === 'video' ? (
+									item.type === 'video' && getYouTubeEmbedUrl(item.src) ? (
+										<iframe
+											class="project-preview-media project-preview-embed"
+											src={getYouTubeEmbedUrl(item.src)}
+											title={item.label}
+											loading={index === 0 ? 'eager' : 'lazy'}
+											allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+											allowfullscreen
+										></iframe>
+									) : item.type === 'video' ? (
 										<video class="project-preview-media" src={item.src} autoplay muted loop playsinline />
 									) : (
 										<img class="project-preview-media" src={item.src} alt={item.label} loading={index === 0 ? 'eager' : 'lazy'} />
@@ -149,7 +168,7 @@ const hasImpacts = impacts.some((item) => hasText(item.title) || hasText(item.de
 		<div class="case-info-grid">
 			<div>
 				<h2>What was this project about?</h2>
-				<p>{caseStudy.heroSubtitle ?? project.description}</p>
+				<p set:html={caseStudy.heroSubtitle ?? project.description} />
 			</div>
 			{overview.filter((item) => item.label !== 'Category' && (hasText(item.label) || hasText(item.value))).map((item) => (
 				<div>
@@ -157,6 +176,21 @@ const hasImpacts = impacts.some((item) => hasText(item.title) || hasText(item.de
 					<p set:html={item.value} />
 				</div>
 			))}
+			{caseLinks.length > 0 && (
+				<div>
+					<h2>Links</h2>
+					<p class="case-links">
+						{caseLinks.map((link, index) => (
+							<>
+								<a href={link.href} target="_blank" rel="noreferrer" aria-label={link.label ?? `Project link ${index + 1}`}>
+									{index + 1}
+								</a>
+								{index < caseLinks.length - 1 && <span aria-hidden="true">|</span>}
+							</>
+						))}
+					</p>
+				</div>
+			)}
 		</div>
 	</section>
 
@@ -220,13 +254,13 @@ const hasImpacts = impacts.some((item) => hasText(item.title) || hasText(item.de
 			<section class="case-challenges">
 				<p class="case-kicker">Challenges Faced</p>
 				<div class="case-challenge-grid">
-					{challenges.filter((challenge) => hasText(challenge.title) || challenge.solutions?.some(hasText)).map((challenge, index) => (
+					{challenges.filter((challenge) => hasText(challenge.title) || getChallengeDetails(challenge).length).map((challenge, index) => (
 						<article>
 							<span>{String(index + 1).padStart(2, '0')}</span>
 							<h2>{challenge.title}</h2>
-							{challenge.solutions?.some(hasText) && (
+							{getChallengeDetails(challenge).length > 0 && (
 								<ul>
-									{challenge.solutions.filter(hasText).map((solutionItem) => <li>{solutionItem}</li>)}
+									{getChallengeDetails(challenge).map((solutionItem) => <li>{solutionItem}</li>)}
 								</ul>
 							)}
 						</article>

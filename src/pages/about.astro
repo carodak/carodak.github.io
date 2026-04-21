@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ProgressNav from '../components/ProgressNav.astro';
 import { getCopy } from '../data/site';
 
 const language = 'en';
@@ -7,9 +8,63 @@ const copy = getCopy(language);
 ---
 
 <BaseLayout title={`${copy.pages.about.title} - ${copy.name}`} description={copy.description} language={language} path="/about/">
-	<main class="simple-page">
-		<a href="/">C.</a>
-		<h1>{copy.pages.about.title}</h1>
-		<p>{copy.pages.about.body}</p>
+	<ProgressNav language={language} isHome={false} />
+	<main class="about-page">
+		<a class="case-back about-back" href="/">
+			<span aria-hidden="true"></span>
+			Back home
+		</a>
+
+		<section class="about-hero">
+			<h1><em>How</em> I got here?</h1>
+			<div class="about-story">
+				<p class="about-story-note">Oh no, she's going to write a wall of text about her life!</p>
+				<p>
+					Back in the early 2000s, I was four and
+					completely absorbed by my dad's computer. It felt like freedom: this strange machine could teach me
+					almost anything, if I was curious enough to ask.
+				</p>
+				<p>
+					I later followed the classic science path: a scientific high school diploma with a mathematics focus, a
+					computer science bachelor degree in France, and a master's in computer science & AI (before it became so popular, I swear) at the University of Montreal.
+				</p>
+				<p>
+					Starting that early probably explains why I now care so much about the impact of technology on society,
+					and why I try to build with more intention.
+				</p>
+			</div>
+		</section>
+
+		<aside class="about-random">
+			<p class="case-kicker">Random facts</p>
+			<p>
+				I formatted my first laptop around age 12 after corrupting my mother's Windows installation and deciding it
+				was better if nobody noticed. I started making simple HTML websites around 13.
+			</p>
+			<p>
+				I also have an artistic side: I like writing poetry, and I followed a few acting classes.
+			</p>
+		</aside>
+
+		<section class="about-skills">
+			<p class="case-kicker">Technical Skills</p>
+			<div>
+				<h2>I do a lot.</h2>
+				<p>
+					I think of myself as a generalist with a wide technical range: OOP languages like C++, C#, and Java;
+					web tools like React, JavaScript, HTML, CSS, PHP, and Flask; Python for data and automation; and even
+					functional languages like Scheme.
+				</p>
+				<p>
+					I build web platforms, XR experiences, games, design systems, data tools, experimental tasks, and
+					scientific papers. I like moving between disciplines and making the pieces talk to each other.
+				</p>
+			</div>
+		</section>
+
+		<a class="about-play-link" href="/play">
+			Play
+			<span aria-hidden="true"></span>
+		</a>
 	</main>
 </BaseLayout>

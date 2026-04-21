@@ -17,6 +17,11 @@ const projects = copy.projects.items
 	.sort((a, b) => (a.featuredPosition ?? 999) - (b.featuredPosition ?? 999));
 const visibleCategories = (project) => project.categories.filter((category) => category !== 'Featured');
 const experienceHeadingLines = copy.experience.heading.split('\n');
+const getYouTubeEmbedUrl = (src = '') => {
+	const match = src.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/);
+	const id = match?.[1];
+	return id ? `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&rel=0&playsinline=1` : '';
+};
 ---
 
 <ProgressNav language={language} />
@@ -126,7 +131,15 @@ const experienceHeadingLines = copy.experience.heading.split('\n');
 							<div class:list={['project-visual', `project-visual-${project.visual.theme}`]} aria-hidden="true">
 								{
 									projectPreview?.src ? (
-										projectPreview.type === 'video' ? (
+										projectPreview.type === 'video' && getYouTubeEmbedUrl(projectPreview.src) ? (
+											<iframe
+												class="project-preview-media project-preview-embed"
+												src={getYouTubeEmbedUrl(projectPreview.src)}
+												title={projectPreview.label}
+												loading="lazy"
+												allow="autoplay; encrypted-media; picture-in-picture"
+											></iframe>
+										) : projectPreview.type === 'video' ? (
 											<video class="project-preview-media" src={projectPreview.src} autoplay muted loop playsinline />
 										) : (
 											<img class="project-preview-media" src={projectPreview.src} alt="" loading="lazy" />
@@ -188,6 +201,22 @@ const experienceHeadingLines = copy.experience.heading.split('\n');
 		<div class="contact-content">
 			<a class="still-here" href={`mailto:${copy.contact.email}`}>{copy.contact.teaser}</a>
 			<h2>{copy.contact.heading} <em>{copy.contact.headingEmphasis}</em></h2>
+			<form class="contact-form" data-contact-form data-contact-email={copy.contact.email}>
+				<label>
+					<span>Name</span>
+					<input name="name" type="text" autocomplete="name" />
+				</label>
+				<label>
+					<span>Email</span>
+					<input name="email" type="email" autocomplete="email" />
+				</label>
+				<label class="contact-form-message">
+					<span>Message</span>
+					<textarea name="message" rows="4"></textarea>
+				</label>
+				<button class="blue-button contact-submit" type="submit">Send</button>
+			</form>
+			<p class="email-info">or send an email to</p>
 			<a class="email-link" href={`mailto:${copy.contact.email}`}>{copy.contact.email}</a>
 		</div>
 	</section>
@@ -297,6 +326,26 @@ const experienceHeadingLines = copy.experience.heading.split('\n');
 
 	projectPrev?.addEventListener('click', () => goToProject(activeProjectIndex - 1));
 	projectNext?.addEventListener('click', () => goToProject(activeProjectIndex + 1));
+
+	document.querySelector('[data-contact-form]')?.addEventListener('submit', (event) => {
+		event.preventDefault();
+
+		const form = event.currentTarget;
+		const formData = new FormData(form);
+		const recipient = form.getAttribute('data-contact-email');
+		const name = String(formData.get('name') || '').trim();
+		const email = String(formData.get('email') || '').trim();
+		const message = String(formData.get('message') || '').trim();
+		const subject = name ? `Portfolio contact from ${name}` : 'Portfolio contact';
+		const body = [
+			name && `Name: ${name}`,
+			email && `Email: ${email}`,
+			'',
+			message,
+		].filter(Boolean).join('\n');
+
+		window.location.href = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+	});
 
 	projectsSection?.addEventListener(
 		'wheel',
