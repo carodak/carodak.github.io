@@ -54,7 +54,6 @@ const { label } = Astro.props;
 			if (!modelStage || !modelViewer) return;
 
 			const isHomePage = () => document.body.classList.contains('is-home');
-			const modelLoadedKey = 'carodak-hero-model-loaded';
 
 			let ticking = false;
 			let currentProgress = 0;
@@ -66,19 +65,20 @@ const { label } = Astro.props;
 			let introWheelProgress = 0;
 			let cueScrollPending = false;
 			let modelFullyHidden = false;
-			let modelLoaded = window.sessionStorage.getItem(modelLoadedKey) === 'true';
+			
 			const introWheelThreshold = 900;
+
+			let modelLoaded = false;
 
 			const markModelLoaded = () => {
 				modelLoaderBar?.style.setProperty('--model-load-progress', '100%');
 				modelLoader?.classList.add('is-loaded');
 				modelLoaded = true;
-				window.sessionStorage.setItem(modelLoadedKey, 'true');
 				document.dispatchEvent(new CustomEvent('carodak:model-loaded'));
 			};
 
 			const syncModelLoadedState = () => {
-				if (modelLoaded || modelViewer.loaded) {
+				if (modelViewer.loaded) {
 					markModelLoaded();
 				}
 			};
@@ -215,15 +215,13 @@ const { label } = Astro.props;
 					document.dispatchEvent(new CustomEvent('carodak:model-hidden'));
 				}
 
-				const rect = hero?.getBoundingClientRect();
-
-				if (rect && rect.bottom <= window.innerHeight * 0.18) {
+				if (modelRect.bottom <= 0) {
 					introZoomHeld = false;
 					introZoomPulse = 0;
 					modelStage.classList.remove('is-filter-wiping');
 				}
 			};
-
+			
 			window.addEventListener(
 				'scroll',
 				() => {
