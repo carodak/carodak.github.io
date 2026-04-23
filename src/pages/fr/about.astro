@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import BackHomeLink from '../../components/BackHomeLink.astro';
 import { getCopy } from '../../data/site';
 
 const language = 'fr';
@@ -8,10 +9,7 @@ const copy = getCopy(language);
 
 <BaseLayout title={`${copy.pages.about.title} - ${copy.name}`} description={copy.description} language={language} path="/about/">
 	<main class="about-page">
-		<a class="case-back about-back" href="/fr/">
-			<span aria-hidden="true"></span>
-			Back home
-		</a>
+		<BackHomeLink href="/fr/" />
 
 		<section class="about-hero">
 			<h1><em>How</em> I got here?</h1>

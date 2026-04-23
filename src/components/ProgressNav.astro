@@ -16,7 +16,7 @@ const sectionHref = (id: string) => {
 const chapterHref = (chapter) => chapter.kind === 'page' ? localizedPath(language, chapter.path) : sectionHref(chapter.id);
 ---
 
-<aside class="progress-nav" aria-label="Page chapters">
+<aside class="progress-nav" aria-label="Page chapters" data-progress-nav-version="2">
 	<button class="chapter-menu-toggle" type="button" aria-expanded="false" aria-label="Open chapter menu" data-chapter-menu-toggle>
 		<span aria-hidden="true"></span>
 	</button>
@@ -51,31 +51,55 @@ const chapterHref = (chapter) => chapter.kind === 'page' ? localizedPath(languag
 	window.__carodakProgressController?.abort();
 	window.__carodakProgressController = new AbortController();
 	const progressSignal = window.__carodakProgressController.signal;
+	const progressNavVersion = '2';
 	const currentScript = document.currentScript;
 	const currentProgressNav = currentScript?.previousElementSibling?.matches?.('.progress-nav')
 		? currentScript.previousElementSibling
 		: Array.from(document.querySelectorAll('.progress-nav')).at(-1);
 
-	Array.from(document.querySelectorAll('.progress-nav')).forEach((nav) => {
-		const isCurrent = nav === currentProgressNav;
-		nav.toggleAttribute('hidden', !isCurrent);
-		nav.toggleAttribute('data-current-progress-nav', isCurrent);
-		if (!isCurrent) nav.remove();
-	});
+	const pruneProgressNavs = () => {
+		Array.from(document.querySelectorAll('.progress-nav')).forEach((nav) => {
+			const isCurrent = nav === currentProgressNav && nav.getAttribute('data-progress-nav-version') === progressNavVersion;
+			nav.toggleAttribute('hidden', !isCurrent);
+			nav.toggleAttribute('data-current-progress-nav', isCurrent);
+			if (!isCurrent) nav.remove();
+		});
+	};
+
+	pruneProgressNavs();
 
 	if (!currentProgressNav) return;
+	if (currentProgressNav.getAttribute('data-progress-nav-version') !== progressNavVersion) {
+		currentProgressNav.remove();
+		return;
+	}
 
 	const links = Array.from(currentProgressNav.querySelectorAll('[data-chapter-link]'));
 	const chapterMenuToggle = currentProgressNav.querySelector('[data-chapter-menu-toggle]');
+	let currentActiveId = null;
 	const sections = links
 		.filter((link) => link.getAttribute('data-chapter-kind') === 'section')
 		.map((link) => document.getElementById(link.getAttribute('data-chapter-link') || ''))
 		.filter(Boolean);
 
 	const setActive = (id) => {
+		const shouldScanActive = Boolean(id && id !== currentActiveId);
+
 		links.forEach((link) => {
-			link.classList.toggle('active', link.getAttribute('data-chapter-link') === id);
+			const isActive = link.getAttribute('data-chapter-link') === id;
+			link.classList.toggle('active', isActive);
+
+			if (!isActive || shouldScanActive) {
+				link.classList.remove('active-scan');
+			}
+
+			if (isActive && shouldScanActive) {
+				void link.offsetWidth;
+				link.classList.add('active-scan');
+			}
 		});
+
+		currentActiveId = id || null;
 	};
 
 	const setChapterMenuOpen = (isOpen) => {
@@ -144,6 +168,13 @@ const chapterHref = (chapter) => chapter.kind === 'page' ? localizedPath(languag
 	document.addEventListener('keydown', (event) => {
 		if (event.key === 'Escape') setChapterMenuOpen(false);
 	}, { signal: progressSignal });
+	document.addEventListener('astro:before-preparation', pruneProgressNavs, { signal: progressSignal });
+	document.addEventListener('astro:before-swap', () => {
+		setChapterMenuOpen(false);
+		pruneProgressNavs();
+	}, { signal: progressSignal });
+	document.addEventListener('astro:after-swap', pruneProgressNavs, { signal: progressSignal });
+	document.addEventListener('astro:page-load', pruneProgressNavs, { signal: progressSignal });
 
 	const observer = new IntersectionObserver(
 		(entries) => {

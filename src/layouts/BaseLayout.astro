@@ -154,18 +154,19 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 			let audioPlayGeneration = 0;
 
 			const resetRouteMenus = () => {
-				const keepLast = (selector) => {
+				const keepLast = (selector, currentSelector = selector) => {
 					const elements = Array.from(document.querySelectorAll(selector));
-					const current = elements.at(-1);
-					elements.slice(0, -1).forEach((element) => {
-						element.hidden = true;
-						element.remove();
+					const current = Array.from(document.querySelectorAll(currentSelector)).at(-1);
+					elements.forEach((element) => {
+						const isCurrent = element === current;
+						element.hidden = !isCurrent;
+						if (!isCurrent) element.remove();
 					});
 					if (current) current.hidden = false;
 					return current;
 				};
 
-				const progressNav = keepLast('.progress-nav');
+				const progressNav = keepLast('.progress-nav', '.progress-nav[data-progress-nav-version="2"]');
 				const caseSideNav = keepLast('.case-side-nav');
 
 				if (!progressNav) {
@@ -328,6 +329,12 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 			}, { signal: baseSignal });
 			document.addEventListener('astro:page-load', resetRouteMenus, { signal: baseSignal });
 			document.addEventListener('astro:before-swap', removeRouteMenusBeforeSwap, { signal: baseSignal });
+			document.addEventListener('astro:after-swap', () => {
+				document.querySelectorAll('.progress-nav:not([data-progress-nav-version="2"])').forEach((element) => {
+					element.hidden = true;
+					element.remove();
+				});
+			}, { signal: baseSignal });
 			resetRouteMenus();
 			window.addEventListener('beforeunload', saveAudioTime, { signal: baseSignal });
 			window.addEventListener('pagehide', saveAudioTime, { signal: baseSignal });

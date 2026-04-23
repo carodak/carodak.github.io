@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import BackHomeLink from '../components/BackHomeLink.astro';
 import { getCopy } from '../data/site';
 
 const language = 'en';
@@ -8,15 +9,12 @@ const copy = getCopy(language);
 
 <BaseLayout title={`${copy.pages.about.title} - ${copy.name}`} description={copy.description} language={language} path="/about/">
 	<main class="about-page">
-		<a class="case-back about-back" href="/">
-			<span aria-hidden="true"></span>
-			Back home
-		</a>
+		<BackHomeLink href="/" />
 
 		<section class="about-hero">
 			<h1><em>How</em> I got here?</h1>
 			<div class="about-story">
-				<p class="about-story-note">Oh no, she's going to write a wall of text about her life!</p>
+				<p class="about-story-note">Oh no, she's going to write a wall of text about her life!🙄</p>
 				<p>
 					Back in the early 2000s, I was four and
 					completely absorbed by my dad's computer. It felt like freedom: this strange machine could teach me
