@@ -17,7 +17,15 @@ const chapterHref = (chapter) => chapter.kind === 'page' ? localizedPath(languag
 ---
 
 <aside class="progress-nav" aria-label="Page chapters">
-	<ol>
+	<button class="chapter-menu-toggle" type="button" aria-expanded="false" aria-label="Open chapter menu" data-chapter-menu-toggle>
+		<span aria-hidden="true"></span>
+	</button>
+	<ol data-chapter-menu>
+		<li class="chapter-home-item">
+			<a class="chapter-home-link" href={localizedPath(language, '/')} aria-label="Home" title="Home">
+				<img class="chapter-home-icon" src="/logo.png" alt="" aria-hidden="true" />
+			</a>
+		</li>
 		{
 			chapterNav.map((chapter) => (
 				<li>
@@ -58,6 +66,7 @@ const chapterHref = (chapter) => chapter.kind === 'page' ? localizedPath(languag
 	if (!currentProgressNav) return;
 
 	const links = Array.from(currentProgressNav.querySelectorAll('[data-chapter-link]'));
+	const chapterMenuToggle = currentProgressNav.querySelector('[data-chapter-menu-toggle]');
 	const sections = links
 		.filter((link) => link.getAttribute('data-chapter-kind') === 'section')
 		.map((link) => document.getElementById(link.getAttribute('data-chapter-link') || ''))
@@ -67,6 +76,12 @@ const chapterHref = (chapter) => chapter.kind === 'page' ? localizedPath(languag
 		links.forEach((link) => {
 			link.classList.toggle('active', link.getAttribute('data-chapter-link') === id);
 		});
+	};
+
+	const setChapterMenuOpen = (isOpen) => {
+		currentProgressNav.classList.toggle('is-open', isOpen);
+		chapterMenuToggle?.setAttribute('aria-expanded', String(isOpen));
+		chapterMenuToggle?.setAttribute('aria-label', isOpen ? 'Close chapter menu' : 'Open chapter menu');
 	};
 
 	const normalizePath = (path) => {
@@ -112,6 +127,23 @@ const chapterHref = (chapter) => chapter.kind === 'page' ? localizedPath(languag
 			setActive(pageChapterId);
 		}
 	};
+
+	chapterMenuToggle?.addEventListener('click', () => {
+		setChapterMenuOpen(chapterMenuToggle.getAttribute('aria-expanded') !== 'true');
+	}, { signal: progressSignal });
+
+	links.forEach((link) => {
+		link.addEventListener('click', () => setChapterMenuOpen(false), { signal: progressSignal });
+	});
+
+	document.addEventListener('click', (event) => {
+		if (currentProgressNav.contains(event.target)) return;
+		setChapterMenuOpen(false);
+	}, { signal: progressSignal });
+
+	document.addEventListener('keydown', (event) => {
+		if (event.key === 'Escape') setChapterMenuOpen(false);
+	}, { signal: progressSignal });
 
 	const observer = new IntersectionObserver(
 		(entries) => {

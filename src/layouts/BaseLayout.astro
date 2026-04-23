@@ -19,6 +19,25 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 <html lang={language}>
 	<head>
 		<meta charset="utf-8" />
+		{
+			path === '/' && (
+				<script is:inline>
+					(() => {
+						if (window.location.hash) return;
+
+						const navigationEntry = window.performance?.getEntriesByType?.('navigation')?.[0];
+						const isReload = navigationEntry?.type === 'reload' || window.performance?.navigation?.type === 1;
+						if (!isReload) return;
+
+						if ('scrollRestoration' in window.history) {
+							window.history.scrollRestoration = 'manual';
+						}
+
+						window.scrollTo(0, 0);
+					})();
+				</script>
+			)
+		}
 		<ClientRouter />
 		<link rel="icon" type="image/svg+xml" href="/logo.png" />
 		<link rel="icon" href="/logo.png" />
@@ -127,8 +146,12 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 			const audioPreferenceKey = 'carodak-background-audio';
 			const audioVolumeKey = 'carodak-background-audio-volume';
 			const audioTimeKey = 'carodak-background-audio-time';
-			let hasTriedInteractionStart = false;
+			const audioHomeAutoplayTriedKey = 'carodak-background-audio-home-autoplay-tried';
+			const isFirstBaseInit = !window.__carodakBaseHasInitialized;
+			window.__carodakBaseHasInitialized = true;
+			const isHomePage = document.body?.classList.contains('is-home');
 			const audioPreference = window.sessionStorage.getItem(audioPreferenceKey);
+			let audioPlayGeneration = 0;
 
 			const resetRouteMenus = () => {
 				const keepLast = (selector) => {
@@ -214,26 +237,42 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 				}
 			};
 
-			const playAudio = async () => {
+			const playAudio = async ({ autoplay = false } = {}) => {
 				if (!audio) return false;
+				const playGeneration = ++audioPlayGeneration;
+				let autoplayCanResolve = true;
+				let autoplayTimer;
+
+				if (autoplay) {
+					autoplayTimer = window.setTimeout(() => {
+						if (playGeneration !== audioPlayGeneration) return;
+						autoplayCanResolve = false;
+						audio.pause();
+						updateAudioToggle(false);
+					}, 320);
+				}
+
 				setAudioVolume(getStoredVolume());
 				try {
 					await audio.play();
+					if (playGeneration !== audioPlayGeneration) return !audio.paused;
+					window.clearTimeout(autoplayTimer);
+
+					if (autoplay && !autoplayCanResolve) {
+						audio.pause();
+						updateAudioToggle(false);
+						return false;
+					}
+
 					window.sessionStorage.setItem(audioPreferenceKey, 'on');
 					updateAudioToggle(true);
 					return true;
 				} catch {
+					if (playGeneration !== audioPlayGeneration) return false;
+					window.clearTimeout(autoplayTimer);
 					updateAudioToggle(false);
 					return false;
 				}
-			};
-
-			const tryStartAfterInteraction = (event) => {
-				if (event?.target?.closest?.('.audio-control')) return;
-				if (hasTriedInteractionStart || window.sessionStorage.getItem(audioPreferenceKey) === 'off') return;
-
-				hasTriedInteractionStart = true;
-				playAudio();
 			};
 
 			audioToggle?.addEventListener('click', async () => {
@@ -242,6 +281,7 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 				if (audio.paused) {
 					playAudio();
 				} else {
+					audioPlayGeneration += 1;
 					audio.pause();
 					window.sessionStorage.setItem(audioPreferenceKey, 'off');
 					updateAudioToggle(false);
@@ -263,12 +303,21 @@ const { title, description, language = defaultLanguage, path = '/', preloadModel
 
 			setAudioVolume(getStoredVolume());
 			restoreAudioTime();
-			if (audioPreference !== 'off') {
-				playAudio();
+			const canTryInitialHomeAutoplay =
+				!audioPreference &&
+				isHomePage &&
+				isFirstBaseInit &&
+				!window.sessionStorage.getItem(audioHomeAutoplayTriedKey);
+
+			if (canTryInitialHomeAutoplay) {
+				window.sessionStorage.setItem(audioHomeAutoplayTriedKey, 'true');
 			}
-			window.addEventListener('pointerdown', tryStartAfterInteraction, { once: true, signal: baseSignal });
-			window.addEventListener('keydown', tryStartAfterInteraction, { once: true, signal: baseSignal });
-			window.addEventListener('wheel', tryStartAfterInteraction, { once: true, passive: true, signal: baseSignal });
+
+			if (audioPreference === 'on' || canTryInitialHomeAutoplay) {
+				playAudio({ autoplay: canTryInitialHomeAutoplay });
+			} else {
+				updateAudioToggle(Boolean(audio && !audio.paused));
+			}
 			document.addEventListener('carodak:model-loaded', () => {
 				audioHint?.classList.add('is-visible');
 				audioHint?.setAttribute('aria-hidden', 'false');

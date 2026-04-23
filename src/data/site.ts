@@ -6,11 +6,11 @@ export const defaultLanguage: Language = 'en';
 export const languages: Language[] = ['en', 'fr'];
 
 export const chapterNav = [
-	{ id: 'projects', prefix: 'Chapter 1', label: 'Work', kind: 'section' },
+	{ id: 'projects', prefix: 'Quest 1', label: 'Work', kind: 'section' },
 	{ id: 'play', prefix: '--Hidden Quest', label: 'Play', kind: 'page', path: '/play/' },
 	{ id: 'about', prefix: '--Hidden Quest', label: 'About', kind: 'page', path: '/about/' },
-	{ id: 'resume', prefix: 'Chapter 2', label: 'Resume', kind: 'section' },
-	{ id: 'contact', prefix: 'Chapter 3', label: 'Contact', kind: 'section' },
+	{ id: 'resume', prefix: 'Quest 2', label: 'Resume', kind: 'section' },
+	{ id: 'contact', prefix: 'Quest 3', label: 'Contact', kind: 'section' },
 ];
 
 const baseCopy = {
@@ -26,7 +26,7 @@ const baseCopy = {
 		heading: 'I want to develop\ntechnology with insight\nand intention.',
 		callout: "Don't you want\nto know more",
 		body:
-			'I am <i>Carodak</i>, a computer scientist by training (M.Sc.), and a writer and designer in my spare time. Computer science gives structure to my thinking, writing opens it up, and design lets me bring the two together to create technology projects that can have a tangible impact on people’s well-being.',
+			'I am <i>Carodak</i>, a computer scientist by training (M.Sc.), and a writer and designer by practice. Computer science gives structure to my thinking, writing opens it up, and design lets me bring the two together to create technological projects that can have a tangible impact on people’s well-being.',
 		link: 'About',
 	},
 	projects: {
@@ -57,7 +57,7 @@ const baseCopy = {
 						{
 							type: 'image',
 							label: 'E-Cog: example of database schema I designed with my colleague Alexandre Caron',
-							src: '/projects/ecog/ecog-db-schemas-supervision.png',
+							src: '/projects/ecog/db-schema-example.png',
 						},
 					],
 				},
@@ -103,7 +103,7 @@ const baseCopy = {
 						],
 					},
 					solution: {
-						title: 'I built an asynchronous platform to make the programs accessible worldwide.',
+						title: 'I developed an asynchronous platform to make the programs accessible worldwide.',
 						description:
 							'Users can log in, follow their assigned training programs, and progress through interactive course content at their own pace. Four decisions shaped the platform: following the ADDIE framework across development phases; choosing an easy-to-maintain web stack for a small team; using a flexible self-hosted architecture for customization, updates, and maintenance; designing interactive SCORM-based training slides and course content; and building admin controls so non-technical colleagues could adjust basic content without developer support.',
 						points: [
@@ -180,7 +180,7 @@ const baseCopy = {
 					theme: 'dark',
 					tags: ['VR', 'EEG', 'emotion detection', 'healthcare'],
 					media: [
-						{ type: 'image', label: 'Savannah VR therapeutic environment', src: '/projects/master-project/savannah.png' },
+						{ type: 'image', label: 'Savannah VR soothing environment', src: '/projects/master-project/savannah.png' },
 						{ type: 'image', label: 'Underwater VR environment', src: '/projects/master-project/underwater.png' },
 						{ type: 'image', label: 'Savannah VR mean frustration results', src: '/projects/master-project/savannahvr-mean-frustration.png' },
 						{ type: 'image', label: 'EEG fast Fourier transform feature extraction', src: '/projects/master-project/eeg-fast-fourier-transform.png' },
@@ -200,7 +200,7 @@ const baseCopy = {
 						{
 							label: 'Technical Details',
 							value:
-								'VR Development: Unity, C#<br />Cognitive Tests: Vanilla JavaScript<br />Dataset: EEG Raw Brain Signals<br />AI & Preprocessing: MATLAB, EEGLAB, Python, Scikit-learn, TensorFlow/Keras.',
+								'VR Development: Unity, C#<br />Cognitive Tests: Vanilla JavaScript<br />Dataset: Raw Brain Signals (EEG)<br />AI & Preprocessing: MATLAB, EEGLAB, Python, Scikit-learn, TensorFlow/Keras.',
 						},
 						{ label: 'Timeline', value: '2019-2020' },
 					],
@@ -228,20 +228,20 @@ const baseCopy = {
 						],
 					},
 					solution: {
-						title: 'I developed relaxing VR environments and an AI model for detecting confusion from EEG data.',
+						title: 'I developed two relaxing VR environments and an AI model for detecting confusion from brain signals.',
 						description:
-							'The long-term goal was to make the VR experience adapt to how the participant feels, while measuring cognitive performance before and after VR immersion.',
+							'The long-term goal was to make the VR experience adapt to how the participant feels, while measuring cognitive performance before, during, and after VR immersion.',
 						points: [
 							'I developed two relaxing VR environments.',
 							'I developed an AI model that could detect confusion from brain-signal data (EEG), with the long-term goal of making the VR experience adapt to how the participant feels.',
-							"We measured the participants' negative emotions before and after the VR session.",
+							"We measured the participants' negative emotions before, during, and after the VR session.",
 						],
 					},
 					process: [
 						{
 							title: 'Process',
 							body:
-								'I researched relaxing virtual landscapes, which led to savannah-inspired and underwater environments.',
+								'I reviewed research on relaxing landscapes, which led to savannah and underwater settings.',
 						},
 						{
 							title: 'Process',
@@ -309,7 +309,7 @@ const baseCopy = {
 					kicker: 'AI',
 					heroTitle: 'Tracking Sea-Ice Movement with AI',
 					heroSubtitle:
-					'This Climate Crisis Hackathon challenge explored how machine learning could help predict Arctic sea-ice movement from wind fields and environmental data.',
+					'This Climate Crisis Hackathon challenge explored how AI could help predict Arctic sea-ice movement from wind fields and environmental data.',
 
 					overview: [
 					{
@@ -320,7 +320,7 @@ const baseCopy = {
 					{
 						label: 'Technical Details',
 						value:
-						'Machine Learning: Python, Scikit-learn. Dataset: Daily Arctic sea-ice drift observations, combining ice velocity with wind, sea-ice concentration, sea-ice thickness, position, date, and distance-to-coast features.',
+						'AI: Python, Scikit-learn. Dataset: Daily Arctic sea-ice drift observations, combining ice velocity with wind, sea-ice concentration, sea-ice thickness, position, date, and distance-to-coast features.',
 					},
 					{
 						label: 'Timeline',
@@ -670,7 +670,7 @@ const baseCopy = {
 					kicker: 'Cognitive Assessment / Puzzle Generation / Experimental Task',
 					heroTitle: 'Developing a Match-3 Puzzle Task and Automating Puzzle Generation',
 					heroSubtitle:
-						'This project explored how a match-3 puzzle task could be used to assess planning, a cognitive skill involved in thinking ahead and solving problems. To support repeated use over time, we built a Python tool that automatically generates new solvable puzzles.<br />Developed as part of my full-time software developer role at Douglas Mental Health Institute.',
+						'This project explored how a match-3 puzzle task could be used to assess planning, a cognitive skill involved in thinking ahead and solving problems. To support repeated use over time, I built a Python tool that automatically generates new solvable puzzles.<br />Developed as part of my full-time software developer role at Douglas Mental Health Institute.',
 
 					overview: [
 						{
@@ -723,14 +723,14 @@ const baseCopy = {
 						points: [
 							'The match-3 format makes the task more engaging and game-like.',
 							'The Python tool automatically generates new puzzle sets offline.',
-							'A BFS solver validates that generated puzzles are solvable.',
+							'An algorithm (BFS solver) validates that generated puzzles are solvable.',
 						],
 					},
 					process: [
 						{
 							title: 'Preliminary research',
 							body:
-								'I helped conduct preliminary research on puzzle games to clarify the scientific and technical requirements of the project.',
+								'I conducted preliminary research on puzzle games to clarify the scientific and technical requirements of the project.',
 						},
 						{
 							title: 'System architecture and design',
@@ -811,11 +811,11 @@ const baseCopy = {
 						{
 							label: 'Technical Details',
 							value:
-								'Data Sources: <a href="https://www150.statcan.gc.ca/n1/daily-quotidien/181015/dq181015a-eng.htm" target="_blank">Statistics Canada, Canadian Survey of Cyber Security and Cybercrime</a>; Government of Canada, Key Small Business Statistics; Ponemon Institute, 2018 State of Cybersecurity in Small & Medium Size Businesses.<br />Format: informative poster<br />Focus: cybersecurity statistics, small and medium-sized businesses, data communication.',
+								'Data Sources: <a href="https://www150.statcan.gc.ca/n1/daily-quotidien/181015/dq181015a-eng.htm" target="_blank">Statistics Canada, Canadian Survey of Cyber Security and Cybercrime</a>; Government of Canada, Key Small Business Statistics; Ponemon Institute, 2018 State of Cybersecurity in Small & Medium Size Businesses.',
 						},
 						{
 							label: 'Timeline',
-							value: 'CyberStats Challenge, 2019',
+							value: 'A few weeks',
 						},
 					],
 					links: [
@@ -855,9 +855,9 @@ const baseCopy = {
 						description:
 							'We selected statistics from multiple sources, shaped them into a clear message, and designed a poster that made the information easier to understand for participants at the event.',
 						points: [
-							'We used cybersecurity and business statistics from official and industry sources.',
+							'We used cybersecurity and business statistics from trusted sources.',
 							'We focused on small and medium-sized businesses because they face important cybersecurity challenges.',
-							'We combined data analysis, storytelling, and visual design to make the information more accessible.',
+							'We combined data analysis and storytelling to make the information more accessible.',
 						],
 					},
 
@@ -871,11 +871,6 @@ const baseCopy = {
 							title: 'Message design',
 							body:
 								'We selected the key statistics and shaped them into a clear visual narrative about cybersecurity issues affecting small and medium-sized businesses.',
-						},
-						{
-							title: 'Poster design',
-							body:
-								'We designed the final poster with attention to clarity, visual hierarchy, readability, and accessibility for a broader audience.',
 						},
 						{
 							title: 'Presentation',
@@ -1051,6 +1046,8 @@ const baseCopy = {
 		items: [
 			{ place: 'Douglas Mental Health Institute', role: 'Software Developer', date: '2020 - Present' },
 			{ place: 'University of Montreal', role: 'Computer Science (AI) Master Student, AI prediction, VR development', date: '2018-2020' },
+			{ place: 'University of Montreal', role: 'Technical Assistant, Support', date: '2019-2020' },
+			{ place: 'McGill University', role: 'Exchange Studies in Computer Science, Game Algorithms', date: '2018 (1 semester)' },
 			{ place: 'LIRMM (Montpellier, France)', role: 'Student Trainee, AI prediction', date: 'July 2027' },
 		],
 	},
@@ -1070,7 +1067,7 @@ const baseCopy = {
 		play: {
 			title: 'Play',
 			body:
-				'Incoming.',
+				'This page is still loading in my brain. More details coming soon.',
 		},
 		project: {
 			back: 'Back to projects',
