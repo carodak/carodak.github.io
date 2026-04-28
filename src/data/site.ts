@@ -774,8 +774,148 @@ const baseCopy = {
 				},
 			},
 			{
-				slug: 'design-poster-cyberstats-challenge-serene-risc-2019',
+				slug: 'revenu-femmes-minorites-visibles-quebec',
 				featuredPosition: 7,
+				categories: ['Featured', 'Data Visualization'],
+				year: '2026',
+				title: 'À diplôme égal: explorer les écarts de revenu médian au Québec',
+				description:
+					'Un outil de data visualization interactif qui compare le revenu d’emploi médian des femmes issues ou non d’une minorité visible au Québec, à diplôme égal.',
+				discipline: 'Data Visualization, Social Data',
+				role: 'Data analyst, Python developer, visualization designer',
+				timeline: 'Exploratory analysis',
+				visual: {
+					title: 'Income Explorer',
+					theme: 'light',
+					tags: ['Statistique Canada', 'Python', 'interactive data viz', 'Québec'],
+					media: [
+						{
+							type: 'image',
+							label: 'Graphique exploratoire généré en Python pour la tranche 25 à 54 ans',
+							src: '/projects/revenu-femmes-minorites-visibles/revenu-par-diplome-25-54.png',
+						},
+						{
+							type: 'image',
+							label: 'Écart relatif de revenu médian par diplôme pour la tranche 25 à 54 ans',
+							src: '/projects/revenu-femmes-minorites-visibles/ecart-relatif-25-54.png',
+						},
+					],
+				},
+				caseStudy: {
+					kicker: 'Data Visualization / Python / Statistique Canada',
+					heroTitle: 'À diplôme égal, les femmes issues d’une minorité visible au Québec ont-elles un revenu d’emploi médian inférieur?',
+					heroSubtitle:
+						'J’ai transformé une analyse Python en outil interactif pour répondre à une question sociale avec le plus de clarté possible: à niveau de diplôme comparable, observe-t-on un revenu d’emploi médian plus bas pour les femmes issues d’une minorité visible au Québec?',
+					overview: [
+						{
+							label: 'My Role',
+							value:
+								'J’ai cadré la question, filtré les données de Statistique Canada avec Python, calculé les écarts absolus et relatifs, puis conçu une visualisation web interactive pour rendre les résultats lisibles sans surcharger la page de chiffres.',
+						},
+						{
+							label: 'Technical Details',
+							value:
+								'Python, Pandas, Matplotlib, Astro, Vanilla JavaScript, SVG. Source: tableau Statistique Canada 98-10-0439-01, année de revenu 2020.',
+						},
+						{
+							label: 'Timeline',
+							value: 'Exploratory analysis and portfolio visualization',
+						},
+					],
+					links: [
+						{
+							label: 'Statistique Canada table',
+							href: 'https://www150.statcan.gc.ca/n1/tbl/csv/98100439-eng.zip',
+						},
+					],
+					problem: {
+						title:
+							'La question est simple, mais les données brutes sont difficiles à lire directement.',
+						description:
+							'Le tableau source contient plusieurs dimensions: géographie, âge, genre, année de revenu, statut d’immigration, diplôme, mesure de revenu et statut de minorité visible. Il fallait réduire ce volume à une comparaison juste et compréhensible.',
+						points: [
+							'Comparer à diplôme égal exige de garder les catégories de diplôme séparées.',
+							'La visualisation devait permettre de changer la tranche d’âge sans relire un tableau lourd.',
+							'Le résultat devait rester descriptif et transparent sur ses limites.',
+						],
+					},
+					solution: {
+						title:
+							'Oui, dans la plupart des comparaisons retenues, le revenu médian observé est inférieur pour les femmes issues d’une minorité visible.',
+						description:
+							'L’outil interactif montre que, pour les femmes au Québec en 2020, les écarts sont majoritairement négatifs dans les diplômes et tranches d’âge analysés. Quelques catégories font exception selon l’âge, ce qui rend l’exploration interactive utile.',
+						points: [
+							'Les filtres permettent de choisir la tranche d’âge et les diplômes à comparer.',
+							'Le graphique d’écart relatif répond rapidement à la question principale.',
+							'Le graphique de revenus médians permet de voir les deux groupes côte à côte.',
+						],
+					},
+					process: [
+						{
+							title: 'Question de recherche',
+							body:
+								'J’ai formulé la question autour d’une comparaison à diplôme égal entre deux groupes statistiques: femmes issues d’une minorité visible et femmes non issues d’une minorité visible au Québec.',
+						},
+						{
+							title: 'Préparation des données',
+							body:
+								'Le script Python filtre le tableau de Statistique Canada pour le Québec, les femmes, l’année de revenu 2020, le revenu d’emploi médian, et le statut combiné des immigrantes et non-immigrantes.',
+						},
+						{
+							title: 'Comparaison',
+							body:
+								'Pour chaque diplôme et tranche d’âge, le script calcule la différence entre les revenus médians et l’écart relatif. Un écart négatif indique un revenu médian inférieur pour les femmes issues d’une minorité visible.',
+						},
+						{
+							title: 'Visualisation',
+							body:
+								'J’ai converti les résultats agrégés en JSON léger pour le site et construit une visualisation SVG en JavaScript afin de permettre des changements de critères en direct.',
+						},
+						{
+							title: 'Limites',
+							body:
+								'Cette analyse décrit des écarts observés. Elle ne contrôle pas le domaine d’études, l’expérience, le secteur, le statut temps plein ou partiel, ni la reconnaissance des diplômes étrangers.',
+						},
+					],
+					challenges: [
+						{
+							title: 'Rendre le résultat lisible',
+							description:
+								'Le principal défi était de répondre clairement à la question sans transformer la page en tableau de chiffres.',
+						},
+						{
+							title: 'Garder la nuance',
+							description:
+								'La variable « minorité visible » est une catégorie statistique imparfaite et l’analyse reste descriptive.',
+						},
+						{
+							title: 'Publier les données proprement',
+							description:
+								'Le site utilise seulement un extrait agrégé en JSON, plutôt que le gros fichier source complet.',
+						},
+					],
+					impact: [
+						{
+							title: 'Live',
+							description:
+								'visualisation interactive intégrée directement dans la page projet.',
+						},
+						{
+							title: 'Clair',
+							description:
+								'la page privilégie une lecture qualitative des écarts et garde les chiffres détaillés dans les graphiques.',
+						},
+						{
+							title: 'Reproductible',
+							description:
+								'la méthodologie suit le script Python existant et s’appuie sur des données agrégées exportées.',
+						},
+					],
+				},
+			},
+			{
+				slug: 'design-poster-cyberstats-challenge-serene-risc-2019',
+				featuredPosition: 8,
 				categories: ['Featured', 'Data Visualization'],
 				year: '2019',
 				title: 'CyberStats Challenge 2019: Poster Highlighting Cybersecurity Issues',
@@ -906,7 +1046,7 @@ const baseCopy = {
 			},
 			{
 				slug: 'developing-spicytracks-mit-reality-hack-2025',
-				featuredPosition: 8,
+				featuredPosition: 9,
 				categories: ['Featured', 'VR', 'Fun&Games'],
 				year: '2025',
 				title: 'Developing SpicyTracks: A Musical Kitchen App in Mixed Reality',

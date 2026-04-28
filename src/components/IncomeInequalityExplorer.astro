@@ -1,0 +1,309 @@
+---
+const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes.json';
+---
+
+<section class="income-explorer" data-income-explorer data-src={dataSrc} aria-labelledby="income-explorer-title">
+	<div class="income-explorer-header">
+		<p class="case-kicker">Visualisation interactive</p>
+		<h2 id="income-explorer-title">Explorer les écarts à diplôme égal</h2>
+		<p>
+			Choisissez une tranche d'âge et quelques diplômes. Le graphique montre si le revenu médian observé est plus bas
+			pour les femmes issues d'une minorité visible au Québec.
+		</p>
+	</div>
+
+	<div class="income-controls" aria-label="Filtres de visualisation">
+		<label>
+			<span>Tranche d'âge</span>
+			<select data-income-age></select>
+		</label>
+		<label>
+			<span>Type de graphique</span>
+			<select data-income-view>
+				<option value="gap">Écart relatif</option>
+				<option value="income">Revenus médians</option>
+			</select>
+		</label>
+	</div>
+
+	<div class="income-summary" data-income-summary aria-live="polite"></div>
+
+	<div class="income-layout">
+		<div class="income-education-panel">
+			<div class="income-panel-top">
+				<p>Diplômes</p>
+				<div>
+					<button type="button" data-income-select-all>Tout</button>
+					<button type="button" data-income-select-key>Résumé</button>
+				</div>
+			</div>
+			<div class="income-education-list" data-income-education-list></div>
+		</div>
+
+		<div class="income-chart-wrap">
+			<svg class="income-chart" data-income-chart role="img" aria-labelledby="income-chart-title income-chart-desc">
+				<title id="income-chart-title">Écarts de revenu médian selon le diplôme</title>
+				<desc id="income-chart-desc">Graphique interactif basé sur les filtres sélectionnés.</desc>
+			</svg>
+			<div class="income-tooltip" data-income-tooltip hidden></div>
+		</div>
+	</div>
+
+	<div class="income-method">
+		<p class="case-kicker">Méthodologie</p>
+		<div>
+			<p>
+				Source: tableau Statistique Canada 98-10-0439-01. L'analyse garde le Québec, les femmes, l'année de revenu
+				2020, le revenu d'emploi médian, et le statut combiné « non-immigrantes et immigrantes ».
+			</p>
+			<p>
+				Pour chaque diplôme, le script Python compare les femmes issues d'une minorité visible aux femmes non issues
+				d'une minorité visible. Un écart négatif signifie un revenu médian plus bas pour le premier groupe.
+			</p>
+			<p>
+				La lecture reste descriptive: elle ne prouve pas une cause et ne contrôle pas le domaine d'études, l'expérience,
+				le secteur d'emploi, le temps plein ou partiel, ni la reconnaissance des diplômes étrangers.
+			</p>
+		</div>
+	</div>
+</section>
+
+<script data-astro-rerun>
+	(() => {
+		window.__carodakIncomeExplorer?.abort();
+		window.__carodakIncomeExplorer = new AbortController();
+		const signal = window.__carodakIncomeExplorer.signal;
+		const root = document.querySelector('[data-income-explorer]');
+		if (!root) return;
+
+		const ageSelect = root.querySelector('[data-income-age]');
+		const viewSelect = root.querySelector('[data-income-view]');
+		const summary = root.querySelector('[data-income-summary]');
+		const educationList = root.querySelector('[data-income-education-list]');
+		const chart = root.querySelector('[data-income-chart]');
+		const tooltip = root.querySelector('[data-income-tooltip]');
+		const selectAll = root.querySelector('[data-income-select-all]');
+		const selectKey = root.querySelector('[data-income-select-key]');
+		const dataSrc = root.getAttribute('data-src');
+		const keyEducations = new Set([
+			'High (secondary) school diploma or equivalency certificate',
+			'College, CEGEP or other non-university certificate or diploma',
+			"Bachelor's degree",
+			"Master's degree",
+			'Earned doctorate',
+		]);
+		let rows = [];
+		let selected = new Set(keyEducations);
+
+		const shortEducation = (label) => {
+			const labels = {
+				'No certificate, diploma or degree': 'Aucun diplôme',
+				'High (secondary) school diploma or equivalency certificate': 'Secondaire',
+				'Apprenticeship certificate': 'Apprentissage',
+				'Non-apprenticeship trades certificate or diploma': 'Métier hors apprent.',
+				'Apprenticeship or trades certificate or diploma': 'Métier',
+				'College, CEGEP or other non-university certificate or diploma': 'Collège / Cégep',
+				'University certificate or diploma below bachelor level': 'Cert. univ. < bac',
+				'Postsecondary certificate or diploma below bachelor level': 'Postsec. < bac',
+				"Bachelor's degree": 'Baccalauréat',
+				'Bachelor’s degree or higher': 'Bac ou plus',
+				'University certificate or diploma above bachelor level': 'Cert. univ. > bac',
+				"Master's degree": 'Maîtrise',
+				'Degree in medicine, dentistry, veterinary medicine or optometry': 'Médecine',
+				'Earned doctorate': 'Doctorat',
+				'Postsecondary certificate, diploma or degree': 'Postsecondaire',
+			};
+			return labels[label] ?? label;
+		};
+
+		const money = (value) =>
+			new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(value);
+		const pct = (value) => `${value > 0 ? '+' : ''}${value.toFixed(1).replace('.', ',')} %`;
+
+		const renderControls = () => {
+			const ages = [...new Set(rows.map((row) => row.age_group))];
+			ageSelect.innerHTML = ages.map((age) => `<option value="${age}">${age.replaceAll('to', 'à')}</option>`).join('');
+			ageSelect.value = ages.includes('25 to 54 years') ? '25 to 54 years' : ages[0];
+
+			const educations = [...new Set(rows.map((row) => row.education))];
+			educationList.innerHTML = educations
+				.map(
+					(education) => `
+						<label title="${education}">
+							<input type="checkbox" value="${education}" ${selected.has(education) ? 'checked' : ''} />
+							<span>${shortEducation(education)}</span>
+						</label>
+					`,
+				)
+				.join('');
+
+			educationList.querySelectorAll('input').forEach((input) => {
+				input.addEventListener(
+					'change',
+					() => {
+						if (input.checked) selected.add(input.value);
+						else selected.delete(input.value);
+						render();
+					},
+					{ signal },
+				);
+			});
+		};
+
+		const svgEl = (name, attrs = {}) => {
+			const el = document.createElementNS('http://www.w3.org/2000/svg', name);
+			Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
+			return el;
+		};
+
+		const showTooltip = (event, html) => {
+			tooltip.innerHTML = html;
+			tooltip.hidden = false;
+			const bounds = root.querySelector('.income-chart-wrap').getBoundingClientRect();
+			tooltip.style.left = `${Math.min(event.clientX - bounds.left + 12, bounds.width - 220)}px`;
+			tooltip.style.top = `${Math.max(event.clientY - bounds.top - 58, 8)}px`;
+		};
+
+		const hideTooltip = () => {
+			tooltip.hidden = true;
+		};
+
+		const render = () => {
+			const age = ageSelect.value;
+			const view = viewSelect.value;
+			let filtered = rows.filter((row) => row.age_group === age && selected.has(row.education));
+			if (!filtered.length) {
+				filtered = rows.filter((row) => row.age_group === age).slice(0, 5);
+				selected = new Set(filtered.map((row) => row.education));
+				renderControls();
+			}
+
+			const negativeCount = filtered.filter((row) => row.gap_relative_pct < 0).length;
+			const strongest = [...filtered].sort((a, b) => a.gap_relative_pct - b.gap_relative_pct)[0];
+			summary.innerHTML = `
+				<strong>${negativeCount}/${filtered.length}</strong>
+				<span>Dans la sélection, la majorité des diplômes affichent un revenu médian plus bas pour les femmes issues d'une minorité visible. L'écart le plus marqué est observé ici pour <em>${shortEducation(strongest.education)}</em>.</span>
+			`;
+
+			chart.innerHTML = '';
+			const width = 960;
+			const height = Math.max(360, filtered.length * (view === 'income' ? 54 : 46) + 118);
+			const margin = { top: 34, right: 34, bottom: 54, left: 190 };
+			chart.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+			const plotWidth = width - margin.left - margin.right;
+			const plotHeight = height - margin.top - margin.bottom;
+			const groupGap = plotHeight / filtered.length;
+
+			const title = svgEl('text', { x: margin.left, y: 20, class: 'income-chart-title' });
+			title.textContent = view === 'gap' ? 'Écart relatif par diplôme' : 'Revenu médian par groupe';
+			chart.append(title);
+
+			if (view === 'gap') {
+				const min = Math.min(-65, ...filtered.map((row) => row.gap_relative_pct));
+				const max = Math.max(20, ...filtered.map((row) => row.gap_relative_pct));
+				const zeroX = margin.left + ((0 - min) / (max - min)) * plotWidth;
+				chart.append(svgEl('line', { x1: zeroX, x2: zeroX, y1: margin.top, y2: height - margin.bottom, class: 'income-zero-line' }));
+
+				filtered.forEach((row, index) => {
+					const y = margin.top + index * groupGap + groupGap * 0.24;
+					const value = row.gap_relative_pct;
+					const x = margin.left + ((Math.min(value, 0) - min) / (max - min)) * plotWidth;
+					const barWidth = Math.abs(((value - 0) / (max - min)) * plotWidth);
+					const bar = svgEl('rect', {
+						x: value < 0 ? x : zeroX,
+						y,
+						width: Math.max(2, barWidth),
+						height: Math.max(18, groupGap * 0.5),
+						rx: 3,
+						class: value < 0 ? 'income-bar-negative' : 'income-bar-positive',
+					});
+					bar.addEventListener('pointermove', (event) => showTooltip(event, `<strong>${shortEducation(row.education)}</strong><br>${pct(value)}<br>${money(row.visible_minority_income)} vs ${money(row.not_visible_minority_income)}`), { signal });
+					bar.addEventListener('pointerleave', hideTooltip, { signal });
+					chart.append(bar);
+
+					const label = svgEl('text', { x: margin.left - 12, y: y + groupGap * 0.34, class: 'income-axis-label' });
+					label.textContent = shortEducation(row.education);
+					chart.append(label);
+					const valueLabel = svgEl('text', {
+						x: value < 0 ? x - 8 : zeroX + barWidth + 8,
+						y: y + groupGap * 0.34,
+						class: 'income-value-label',
+					});
+					valueLabel.textContent = pct(value);
+					chart.append(valueLabel);
+				});
+			} else {
+				const maxIncome = Math.max(...filtered.flatMap((row) => [row.visible_minority_income, row.not_visible_minority_income])) * 1.08;
+				filtered.forEach((row, index) => {
+					const y = margin.top + index * groupGap + groupGap * 0.14;
+					const label = svgEl('text', { x: margin.left - 12, y: y + 24, class: 'income-axis-label' });
+					label.textContent = shortEducation(row.education);
+					chart.append(label);
+
+					[
+						['Femmes issues d’une minorité visible', row.visible_minority_income, 'income-bar-visible', 0],
+						['Femmes non issues d’une minorité visible', row.not_visible_minority_income, 'income-bar-reference', 22],
+					].forEach(([group, value, className, offset]) => {
+						const bar = svgEl('rect', {
+							x: margin.left,
+							y: y + offset,
+							width: Math.max(2, (Number(value) / maxIncome) * plotWidth),
+							height: 16,
+							rx: 3,
+							class: className,
+						});
+						bar.addEventListener('pointermove', (event) => showTooltip(event, `<strong>${shortEducation(row.education)}</strong><br>${group}<br>${money(Number(value))}`), { signal });
+						bar.addEventListener('pointerleave', hideTooltip, { signal });
+						chart.append(bar);
+					});
+				});
+			}
+
+			const legend = svgEl('text', { x: margin.left, y: height - 18, class: 'income-legend' });
+			legend.textContent =
+				view === 'gap'
+					? 'À gauche de zéro: revenu médian inférieur pour les femmes issues d’une minorité visible.'
+					: 'Rose: femmes issues d’une minorité visible. Noir: femmes non issues d’une minorité visible.';
+			chart.append(legend);
+		};
+
+		fetch(dataSrc, { signal })
+			.then((response) => response.json())
+			.then((data) => {
+				rows = data.map((row) => ({
+					...row,
+					visible_minority_income: Number(row.visible_minority_income),
+					not_visible_minority_income: Number(row.not_visible_minority_income),
+					gap_absolute: Number(row.gap_absolute),
+					gap_relative_pct: Number(row.gap_relative_pct),
+				}));
+				renderControls();
+				render();
+			})
+			.catch(() => {
+				summary.textContent = 'La visualisation interactive ne peut pas être chargée pour le moment.';
+			});
+
+		ageSelect.addEventListener('change', render, { signal });
+		viewSelect.addEventListener('change', render, { signal });
+		selectAll.addEventListener(
+			'click',
+			() => {
+				selected = new Set(rows.map((row) => row.education));
+				renderControls();
+				render();
+			},
+			{ signal },
+		);
+		selectKey.addEventListener(
+			'click',
+			() => {
+				selected = new Set(keyEducations);
+				renderControls();
+				render();
+			},
+			{ signal },
+		);
+	})();
+</script>

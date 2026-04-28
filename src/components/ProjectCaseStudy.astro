@@ -1,5 +1,6 @@
 ---
 import { localizedPath, type Language } from '../data/site';
+import IncomeInequalityExplorer from './IncomeInequalityExplorer.astro';
 
 interface Props {
 	language: Language;
@@ -22,6 +23,7 @@ const projectVisual = project.visual ?? {
 	tags: [],
 	media: [{ type: 'mockup', label: project.title }],
 };
+const showIncomeExplorer = project.slug === 'revenu-femmes-minorites-visibles-quebec';
 const categories = (project.categories?.length ? project.categories : [project.discipline]).filter(Boolean);
 const visuals = projectVisual.media?.length ? projectVisual.media : [{ type: 'mockup', label: project.title }];
 const overview = caseStudy.overview ?? [
@@ -172,6 +174,8 @@ const getVideoPosterUrl = (src = '') => src.replace(/\.(mp4|webm|mov)$/i, '-post
 			<span aria-hidden="true"></span>
 		</button>
 	</section>
+
+	{showIncomeExplorer && <IncomeInequalityExplorer />}
 
 	<section class="case-introduction">
 		<p class="case-kicker">Introduction</p>
