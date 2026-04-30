@@ -4,24 +4,28 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 
 <section class="income-explorer" data-income-explorer data-src={dataSrc} aria-labelledby="income-explorer-title">
 	<div class="income-explorer-header">
-		<p class="case-kicker">Visualisation interactive</p>
-		<h2 id="income-explorer-title">Explorer les écarts à diplôme égal</h2>
+		<p class="case-kicker">Interactive visualization</p>
+		<h2 id="income-explorer-title">Explore income gaps by diploma</h2>
 		<p>
-			Choisissez une tranche d'âge et quelques diplômes. Le graphique montre si le revenu médian observé est plus bas
-			pour les femmes issues d'une minorité visible au Québec.
+			Choose an age group and a few education levels. Start with median incomes, then inspect where the observed
+			gaps are largest for women from visible minorities in Quebec.
 		</p>
 	</div>
 
-	<div class="income-controls" aria-label="Filtres de visualisation">
+	<div class="income-controls" aria-label="Visualization filters">
 		<label>
-			<span>Tranche d'âge</span>
+			<span>Age group</span>
 			<select data-income-age></select>
 		</label>
 		<label>
-			<span>Type de graphique</span>
+			<span>Chart type</span>
 			<select data-income-view>
-				<option value="gap">Écart relatif</option>
-				<option value="income">Revenus médians</option>
+				<option value="income">Median incomes</option>
+				<option value="landscape">Income landscape</option>
+				<option value="gap">Relative gap</option>
+				<option value="scatter">Largest gaps</option>
+				<option value="donut">Gap breakdown</option>
+				<option value="sample">Sample size</option>
 			</select>
 		</label>
 	</div>
@@ -31,10 +35,10 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 	<div class="income-layout">
 		<div class="income-education-panel">
 			<div class="income-panel-top">
-				<p>Diplômes</p>
+				<p>Education levels</p>
 				<div>
-					<button type="button" data-income-select-all>Tout</button>
-					<button type="button" data-income-select-key>Résumé</button>
+					<button type="button" data-income-select-all>All</button>
+					<button type="button" data-income-select-key>Summary</button>
 				</div>
 			</div>
 			<div class="income-education-list" data-income-education-list></div>
@@ -42,27 +46,20 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 
 		<div class="income-chart-wrap">
 			<svg class="income-chart" data-income-chart role="img" aria-labelledby="income-chart-title income-chart-desc">
-				<title id="income-chart-title">Écarts de revenu médian selon le diplôme</title>
-				<desc id="income-chart-desc">Graphique interactif basé sur les filtres sélectionnés.</desc>
+				<title id="income-chart-title">Median employment income by education level</title>
+				<desc id="income-chart-desc">Interactive chart based on the selected filters.</desc>
 			</svg>
 			<div class="income-tooltip" data-income-tooltip hidden></div>
 		</div>
 	</div>
 
 	<div class="income-method">
-		<p class="case-kicker">Méthodologie</p>
+		<p class="case-kicker">Source</p>
 		<div>
 			<p>
-				Source: tableau Statistique Canada 98-10-0439-01. L'analyse garde le Québec, les femmes, l'année de revenu
-				2020, le revenu d'emploi médian, et le statut combiné « non-immigrantes et immigrantes ».
-			</p>
-			<p>
-				Pour chaque diplôme, le script Python compare les femmes issues d'une minorité visible aux femmes non issues
-				d'une minorité visible. Un écart négatif signifie un revenu médian plus bas pour le premier groupe.
-			</p>
-			<p>
-				La lecture reste descriptive: elle ne prouve pas une cause et ne contrôle pas le domaine d'études, l'expérience,
-				le secteur d'emploi, le temps plein ou partiel, ni la reconnaissance des diplômes étrangers.
+				Source: <a href="https://www150.statcan.gc.ca/t1/tbl1/fr/tv.action?pid=9810043901" target="_blank">Statistics Canada table 98-10-0439-01</a>,
+				income year 2020. The analysis keeps Quebec, Women+, median employment income, and the combined
+				immigration status "Non-immigrants and Immigrants."
 			</p>
 		</div>
 	</div>
@@ -97,35 +94,50 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 
 		const shortEducation = (label) => {
 			const labels = {
-				'No certificate, diploma or degree': 'Aucun diplôme',
-				'High (secondary) school diploma or equivalency certificate': 'Secondaire',
-				'Apprenticeship certificate': 'Apprentissage',
-				'Non-apprenticeship trades certificate or diploma': 'Métier hors apprent.',
-				'Apprenticeship or trades certificate or diploma': 'Métier',
-				'College, CEGEP or other non-university certificate or diploma': 'Collège / Cégep',
-				'University certificate or diploma below bachelor level': 'Cert. univ. < bac',
-				'Postsecondary certificate or diploma below bachelor level': 'Postsec. < bac',
-				"Bachelor's degree": 'Baccalauréat',
-				'Bachelor’s degree or higher': 'Bac ou plus',
-				'University certificate or diploma above bachelor level': 'Cert. univ. > bac',
-				"Master's degree": 'Maîtrise',
-				'Degree in medicine, dentistry, veterinary medicine or optometry': 'Médecine',
-				'Earned doctorate': 'Doctorat',
-				'Postsecondary certificate, diploma or degree': 'Postsecondaire',
+				'No certificate, diploma or degree': 'No diploma',
+				'High (secondary) school diploma or equivalency certificate': 'High school',
+				'Apprenticeship certificate': 'Apprenticeship',
+				'Non-apprenticeship trades certificate or diploma': 'Trades, non-apprenticeship',
+				'Apprenticeship or trades certificate or diploma': 'Trades',
+				'College, CEGEP or other non-university certificate or diploma': 'College / CEGEP',
+				'University certificate or diploma below bachelor level': 'University cert. below BA',
+				'Postsecondary certificate or diploma below bachelor level': 'Postsecondary below BA',
+				"Bachelor's degree": "Bachelor's",
+				'Bachelor’s degree or higher': "Bachelor's or higher",
+				'Bachelorâ€™s degree or higher': "Bachelor's or higher",
+				'University certificate or diploma above bachelor level': 'University cert. above BA',
+				"Master's degree": "Master's",
+				'Degree in medicine, dentistry, veterinary medicine or optometry': 'Medicine, dentistry, veterinary or optometry',
+				'Earned doctorate': 'Doctorate',
+				'Postsecondary certificate, diploma or degree': 'Postsecondary',
 			};
 			return labels[label] ?? label;
 		};
 
 		const money = (value) =>
-			new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(value);
-		const pct = (value) => `${value > 0 ? '+' : ''}${value.toFixed(1).replace('.', ',')} %`;
+			new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(value);
+		const count = (value) => new Intl.NumberFormat('en-CA', { maximumFractionDigits: 0 }).format(value ?? 0);
+		const pct = (value) => `${value > 0 ? '+' : ''}${value.toFixed(1)}%`;
+		const countNote = (row) => {
+			const minCount = Math.min(row.visible_minority_with_employment_income_count ?? Infinity, row.not_visible_minority_with_employment_income_count ?? Infinity);
+			return minCount < 500 ? '<br><em>Small group: interpret carefully.</em>' : '';
+		};
+		const gapTooltip = (row) => `
+			<strong>${shortEducation(row.education)}</strong><br>
+			Women from visible minorities: ${money(row.visible_minority_income)}<br>
+			Women not from visible minorities: ${money(row.not_visible_minority_income)}<br>
+			Gap: ${money(row.gap_absolute)} (${pct(row.gap_relative_pct)})<br>
+			Women included in median income: ${count(row.visible_minority_with_employment_income_count)} vs ${count(row.not_visible_minority_with_employment_income_count)}
+			${countNote(row)}
+		`;
 
 		const renderControls = () => {
 			const ages = [...new Set(rows.map((row) => row.age_group))];
-			ageSelect.innerHTML = ages.map((age) => `<option value="${age}">${age.replaceAll('to', 'à')}</option>`).join('');
+			ageSelect.innerHTML = ages.map((age) => `<option value="${age}">${age}</option>`).join('');
 			ageSelect.value = ages.includes('25 to 54 years') ? '25 to 54 years' : ages[0];
 
 			const educations = [...new Set(rows.map((row) => row.education))];
+			selectAll.textContent = selected.size === educations.length ? 'Clear' : 'All';
 			educationList.innerHTML = educations
 				.map(
 					(education) => `
@@ -150,11 +162,39 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 			});
 		};
 
-		const svgEl = (name, attrs = {}) => {
-			const el = document.createElementNS('http://www.w3.org/2000/svg', name);
-			Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
-			return el;
+			const svgEl = (name, attrs = {}) => {
+				const el = document.createElementNS('http://www.w3.org/2000/svg', name);
+				Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
+				return el;
+			};
+
+		const polarToCartesian = (centerX, centerY, radius, angleInDegrees) => {
+			const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180;
+			return {
+				x: centerX + radius * Math.cos(angleInRadians),
+				y: centerY + radius * Math.sin(angleInRadians),
+			};
 		};
+
+		const describeArc = (centerX, centerY, outerRadius, innerRadius, startAngle, endAngle) => {
+			const outerStart = polarToCartesian(centerX, centerY, outerRadius, endAngle);
+			const outerEnd = polarToCartesian(centerX, centerY, outerRadius, startAngle);
+			const innerStart = polarToCartesian(centerX, centerY, innerRadius, startAngle);
+			const innerEnd = polarToCartesian(centerX, centerY, innerRadius, endAngle);
+			const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
+
+			return [
+				`M ${outerStart.x} ${outerStart.y}`,
+				`A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 0 ${outerEnd.x} ${outerEnd.y}`,
+				`L ${innerStart.x} ${innerStart.y}`,
+				`A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 1 ${innerEnd.x} ${innerEnd.y}`,
+				'Z',
+			].join(' ');
+		};
+
+		const pathFromPoints = (points) => points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`).join(' ');
+		const areaFromPoints = (points, baselineY) =>
+			`${pathFromPoints(points)} L ${points.at(-1).x} ${baselineY} L ${points[0].x} ${baselineY} Z`;
 
 		const showTooltip = (event, html) => {
 			tooltip.innerHTML = html;
@@ -172,23 +212,38 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 			const age = ageSelect.value;
 			const view = viewSelect.value;
 			let filtered = rows.filter((row) => row.age_group === age && selected.has(row.education));
-			if (!filtered.length) {
+			if (!filtered.length && selected.size > 0) {
 				filtered = rows.filter((row) => row.age_group === age).slice(0, 5);
 				selected = new Set(filtered.map((row) => row.education));
 				renderControls();
+			}
+			if (!filtered.length) {
+				summary.innerHTML = `
+					<strong>0/0</strong>
+					<span>Select at least one education level to display the chart.</span>
+				`;
+				chart.innerHTML = '';
+				chart.setAttribute('viewBox', '0 0 960 260');
+				const emptyTitle = svgEl('text', { x: 230, y: 130, class: 'income-chart-title' });
+				emptyTitle.textContent = 'No education level selected';
+				chart.append(emptyTitle);
+				return;
 			}
 
 			const negativeCount = filtered.filter((row) => row.gap_relative_pct < 0).length;
 			const strongest = [...filtered].sort((a, b) => a.gap_relative_pct - b.gap_relative_pct)[0];
 			summary.innerHTML = `
 				<strong>${negativeCount}/${filtered.length}</strong>
-				<span>Dans la sélection, la majorité des diplômes affichent un revenu médian plus bas pour les femmes issues d'une minorité visible. L'écart le plus marqué est observé ici pour <em>${shortEducation(strongest.education)}</em>.</span>
+				<span>In this selection, ${negativeCount} education level${negativeCount === 1 ? '' : 's'} show a lower median income for women from visible minorities. The largest relative gap here is for <em>${shortEducation(strongest.education)}</em>.</span>
 			`;
 
 			chart.innerHTML = '';
 			const width = 960;
-			const height = Math.max(360, filtered.length * (view === 'income' ? 54 : 46) + 118);
-			const margin = { top: 34, right: 34, bottom: 54, left: 190 };
+			const wideViews = new Set(['scatter', 'donut', 'landscape']);
+			const height = wideViews.has(view) ? 560 : Math.max(360, filtered.length * (view === 'income' ? 54 : 46) + 118);
+			const margin = wideViews.has(view)
+				? { top: 44, right: 42, bottom: 72, left: 92 }
+				: { top: 34, right: 34, bottom: 54, left: 230 };
 			chart.setAttribute('viewBox', `0 0 ${width} ${height}`);
 
 			const plotWidth = width - margin.left - margin.right;
@@ -196,7 +251,18 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 			const groupGap = plotHeight / filtered.length;
 
 			const title = svgEl('text', { x: margin.left, y: 20, class: 'income-chart-title' });
-			title.textContent = view === 'gap' ? 'Écart relatif par diplôme' : 'Revenu médian par groupe';
+			title.textContent =
+				view === 'gap'
+					? 'Relative gap by education level'
+					: view === 'scatter'
+						? 'Where are the largest gaps?'
+						: view === 'donut'
+							? 'Gap breakdown by education level'
+							: view === 'landscape'
+								? 'Median income landscape'
+								: view === 'sample'
+									? 'Women with employment income'
+									: 'Median employment income by group';
 			chart.append(title);
 
 			if (view === 'gap') {
@@ -218,7 +284,7 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 						rx: 3,
 						class: value < 0 ? 'income-bar-negative' : 'income-bar-positive',
 					});
-					bar.addEventListener('pointermove', (event) => showTooltip(event, `<strong>${shortEducation(row.education)}</strong><br>${pct(value)}<br>${money(row.visible_minority_income)} vs ${money(row.not_visible_minority_income)}`), { signal });
+					bar.addEventListener('pointermove', (event) => showTooltip(event, gapTooltip(row)), { signal });
 					bar.addEventListener('pointerleave', hideTooltip, { signal });
 					chart.append(bar);
 
@@ -233,7 +299,7 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 					valueLabel.textContent = pct(value);
 					chart.append(valueLabel);
 				});
-			} else {
+			} else if (view === 'income') {
 				const maxIncome = Math.max(...filtered.flatMap((row) => [row.visible_minority_income, row.not_visible_minority_income])) * 1.08;
 				filtered.forEach((row, index) => {
 					const y = margin.top + index * groupGap + groupGap * 0.14;
@@ -242,8 +308,8 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 					chart.append(label);
 
 					[
-						['Femmes issues d’une minorité visible', row.visible_minority_income, 'income-bar-visible', 0],
-						['Femmes non issues d’une minorité visible', row.not_visible_minority_income, 'income-bar-reference', 22],
+						['Women from visible minorities', row.visible_minority_income, 'income-bar-visible', 0],
+						['Women not from visible minorities', row.not_visible_minority_income, 'income-bar-reference', 22],
 					].forEach(([group, value, className, offset]) => {
 						const bar = svgEl('rect', {
 							x: margin.left,
@@ -253,18 +319,204 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 							rx: 3,
 							class: className,
 						});
-						bar.addEventListener('pointermove', (event) => showTooltip(event, `<strong>${shortEducation(row.education)}</strong><br>${group}<br>${money(Number(value))}`), { signal });
+						bar.addEventListener('pointermove', (event) => showTooltip(event, gapTooltip(row)), { signal });
 						bar.addEventListener('pointerleave', hideTooltip, { signal });
 						chart.append(bar);
 					});
 				});
+			} else if (view === 'sample') {
+				const maxCount = Math.max(...filtered.flatMap((row) => [row.visible_minority_with_employment_income_count ?? 0, row.not_visible_minority_with_employment_income_count ?? 0])) * 1.08;
+				filtered.forEach((row, index) => {
+					const y = margin.top + index * groupGap + groupGap * 0.14;
+					const label = svgEl('text', { x: margin.left - 12, y: y + 24, class: 'income-axis-label' });
+					label.textContent = shortEducation(row.education);
+					chart.append(label);
+
+					[
+						['Women from visible minorities with employment income', row.visible_minority_with_employment_income_count, 'income-bar-visible', 0],
+						['Women not from visible minorities with employment income', row.not_visible_minority_with_employment_income_count, 'income-bar-reference', 22],
+					].forEach(([group, value, className, offset]) => {
+						const numericValue = Number(value ?? 0);
+						const bar = svgEl('rect', {
+							x: margin.left,
+							y: y + offset,
+							width: Math.max(2, (numericValue / maxCount) * plotWidth),
+							height: 16,
+							rx: 3,
+							class: className,
+						});
+						bar.addEventListener('pointermove', (event) => showTooltip(event, `<strong>${shortEducation(row.education)}</strong><br>${group}: ${count(numericValue)}<br>Median income gap: ${money(row.gap_absolute)} (${pct(row.gap_relative_pct)})${countNote(row)}`), { signal });
+						bar.addEventListener('pointerleave', hideTooltip, { signal });
+						chart.append(bar);
+
+						const valueLabel = svgEl('text', {
+							x: margin.left + (numericValue / maxCount) * plotWidth + 8,
+							y: y + offset + 9,
+							class: 'income-sample-label',
+						});
+						valueLabel.textContent = count(numericValue);
+						chart.append(valueLabel);
+					});
+				});
+			} else if (view === 'scatter') {
+				const maxIncome = Math.max(...filtered.flatMap((row) => [row.visible_minority_income, row.not_visible_minority_income])) * 1.08;
+				const minIncome = 0;
+				const xFor = (value) => margin.left + ((value - minIncome) / (maxIncome - minIncome)) * plotWidth;
+				const yFor = (value) => height - margin.bottom - ((value - minIncome) / (maxIncome - minIncome)) * plotHeight;
+				const largest = [...filtered].sort((a, b) => Math.abs(b.gap_absolute) - Math.abs(a.gap_absolute)).slice(0, 4);
+				const largestSet = new Set(largest.map((row) => row.education));
+
+				for (let tick = 0; tick <= maxIncome; tick += 20000) {
+					const x = xFor(tick);
+					const y = yFor(tick);
+					chart.append(svgEl('line', { x1: x, x2: x, y1: margin.top, y2: height - margin.bottom, class: 'income-grid-line' }));
+					chart.append(svgEl('line', { x1: margin.left, x2: width - margin.right, y1: y, y2: y, class: 'income-grid-line' }));
+				}
+				chart.append(svgEl('line', { x1: margin.left, y1: height - margin.bottom, x2: width - margin.right, y2: margin.top, class: 'income-equality-line' }));
+				const equalityNote = svgEl('text', { x: width - margin.right - 18, y: margin.top + 34, class: 'income-equality-label', 'text-anchor': 'end' });
+				equalityNote.textContent = 'Diagonal line = equal median income';
+				chart.append(equalityNote);
+				const belowNote = svgEl('text', { x: margin.left + 18, y: margin.top + 60, class: 'income-equality-label' });
+				belowNote.textContent = 'Below the line: lower income for women from visible minorities';
+				chart.append(belowNote);
+
+				filtered.forEach((row) => {
+					const x = xFor(row.not_visible_minority_income);
+					const y = yFor(row.visible_minority_income);
+					const radius = Math.max(8, Math.min(34, Math.abs(row.gap_absolute) / 450));
+					const point = svgEl('circle', {
+						cx: x,
+						cy: y,
+						r: radius,
+						class: row.gap_relative_pct < 0 ? 'income-dot-negative' : 'income-dot-positive',
+					});
+					point.addEventListener('pointermove', (event) => showTooltip(event, gapTooltip(row)), { signal });
+					point.addEventListener('pointerleave', hideTooltip, { signal });
+					chart.append(point);
+
+					if (largestSet.has(row.education)) {
+						const label = svgEl('text', { x: Math.min(x + radius + 8, width - margin.right - 180), y: y - radius - 4, class: 'income-bubble-label' });
+						label.textContent = shortEducation(row.education);
+						chart.append(label);
+					}
+				});
+
+				const xLabel = svgEl('text', { x: margin.left + plotWidth / 2, y: height - 22, class: 'income-legend' });
+				xLabel.textContent = 'Median income: women not from visible minorities';
+				chart.append(xLabel);
+				const yLabel = svgEl('text', { x: 20, y: margin.top + plotHeight / 2, class: 'income-legend', transform: `rotate(-90 20 ${margin.top + plotHeight / 2})` });
+				yLabel.textContent = 'Median income: women from visible minorities';
+				chart.append(yLabel);
+			} else if (view === 'landscape') {
+				const sorted = [...filtered].sort((a, b) => a.not_visible_minority_income - b.not_visible_minority_income);
+				const maxIncome = Math.max(...sorted.flatMap((row) => [row.visible_minority_income, row.not_visible_minority_income])) * 1.08;
+				const baselineY = height - margin.bottom;
+				const xFor = (index) => margin.left + (index / Math.max(1, sorted.length - 1)) * plotWidth;
+				const yFor = (value) => baselineY - (value / maxIncome) * plotHeight;
+				const visiblePoints = sorted.map((row, index) => ({ x: xFor(index), y: yFor(row.visible_minority_income), row }));
+				const referencePoints = sorted.map((row, index) => ({ x: xFor(index), y: yFor(row.not_visible_minority_income), row }));
+
+				for (let tick = 0; tick <= maxIncome; tick += 20000) {
+					const y = yFor(tick);
+					chart.append(svgEl('line', { x1: margin.left, x2: width - margin.right, y1: y, y2: y, class: 'income-grid-line' }));
+				}
+
+				chart.append(svgEl('path', { d: areaFromPoints(referencePoints, baselineY), class: 'income-landscape-reference' }));
+				chart.append(svgEl('path', { d: areaFromPoints(visiblePoints, baselineY), class: 'income-landscape-visible' }));
+				chart.append(svgEl('path', { d: pathFromPoints(referencePoints), class: 'income-landscape-line-reference' }));
+				chart.append(svgEl('path', { d: pathFromPoints(visiblePoints), class: 'income-landscape-line-visible' }));
+
+				visiblePoints.forEach((point, index) => {
+					const row = point.row;
+					const target = svgEl('circle', {
+						cx: point.x,
+						cy: point.y,
+						r: 7,
+						class: row.gap_relative_pct < 0 ? 'income-dot-negative' : 'income-dot-positive',
+					});
+					target.addEventListener('pointermove', (event) => showTooltip(event, gapTooltip(row)), { signal });
+					target.addEventListener('pointerleave', hideTooltip, { signal });
+					chart.append(target);
+
+					if (index === 0 || index === sorted.length - 1 || Math.abs(row.gap_absolute) === Math.max(...sorted.map((item) => Math.abs(item.gap_absolute)))) {
+						const label = svgEl('text', { x: point.x, y: point.y - 14, class: 'income-bubble-label', 'text-anchor': index > sorted.length / 2 ? 'end' : 'start' });
+						label.textContent = shortEducation(row.education);
+						chart.append(label);
+					}
+				});
+
+				const legendA = svgEl('text', { x: margin.left + 18, y: margin.top + 28, class: 'income-landscape-label-visible' });
+				legendA.textContent = 'Women from visible minorities';
+				chart.append(legendA);
+				const legendB = svgEl('text', { x: margin.left + 18, y: margin.top + 54, class: 'income-landscape-label-reference' });
+				legendB.textContent = 'Women not from visible minorities';
+				chart.append(legendB);
+			} else {
+				const sorted = [...filtered].sort((a, b) => Math.abs(b.gap_absolute) - Math.abs(a.gap_absolute));
+				const totalGap = sorted.reduce((sum, row) => sum + Math.abs(row.gap_absolute), 0) || 1;
+				const centerX = 392;
+				const centerY = 286;
+				const outerRadius = 208;
+				const innerRadius = 118;
+				const colors = ['#6f54b8', '#8471bd', '#9a8ac8', '#b2a7d5', '#d2cce8', '#e2bc36', '#78a95f', '#4d9a8b', '#5576b8'];
+				let angle = -90;
+
+				sorted.forEach((row, index) => {
+					const sliceAngle = (Math.abs(row.gap_absolute) / totalGap) * 360;
+					const endAngle = angle + sliceAngle;
+					const segment = svgEl('path', {
+						d: describeArc(centerX, centerY, outerRadius, innerRadius, angle, endAngle),
+						fill: colors[index % colors.length],
+						class: row.gap_relative_pct < 0 ? 'income-donut-negative' : 'income-donut-positive',
+					});
+					segment.addEventListener('pointermove', (event) => showTooltip(event, gapTooltip(row)), { signal });
+					segment.addEventListener('pointerleave', hideTooltip, { signal });
+					chart.append(segment);
+
+					if (index < 7) {
+						const midAngle = angle + sliceAngle / 2;
+						const labelPoint = polarToCartesian(centerX, centerY, outerRadius + 26, midAngle);
+						const label = svgEl('text', {
+							x: labelPoint.x,
+							y: labelPoint.y,
+							class: 'income-donut-label',
+							'text-anchor': labelPoint.x < centerX ? 'end' : 'start',
+						});
+						label.textContent = shortEducation(row.education);
+						chart.append(label);
+					}
+
+					angle = endAngle;
+				});
+
+				const centerTitle = svgEl('text', { x: centerX, y: centerY - 10, class: 'income-donut-center' });
+				centerTitle.textContent = `${negativeCount}/${filtered.length}`;
+				chart.append(centerTitle);
+				const centerSubtitle = svgEl('text', { x: centerX, y: centerY + 22, class: 'income-donut-subtitle' });
+				centerSubtitle.textContent = 'lower incomes';
+				chart.append(centerSubtitle);
+
+				const note = svgEl('text', { x: 690, y: 160, class: 'income-legend' });
+				note.textContent = 'Segment size = absolute income gap';
+				chart.append(note);
+				const note2 = svgEl('text', { x: 690, y: 186, class: 'income-legend' });
+				note2.textContent = 'Hover to see both groups and the gap';
+				chart.append(note2);
 			}
 
 			const legend = svgEl('text', { x: margin.left, y: height - 18, class: 'income-legend' });
 			legend.textContent =
 				view === 'gap'
-					? 'À gauche de zéro: revenu médian inférieur pour les femmes issues d’une minorité visible.'
-					: 'Rose: femmes issues d’une minorité visible. Noir: femmes non issues d’une minorité visible.';
+					? 'Left of zero: lower median income for women from visible minorities.'
+					: view === 'scatter'
+						? 'Each bubble is an education level. Larger bubbles show larger absolute gaps; the diagonal marks equal incomes.'
+					: view === 'donut'
+							? 'Each ring segment is an education level. Larger segments mean larger dollar gaps.'
+							: view === 'landscape'
+								? 'Layered areas trace both groups across selected education levels, sorted by reference-group income.'
+								: view === 'sample'
+									? 'Counts show how many women are behind each comparison.'
+									: 'Purple: women from visible minorities. Black: women not from visible minorities.';
 			chart.append(legend);
 		};
 
@@ -277,12 +529,16 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 					not_visible_minority_income: Number(row.not_visible_minority_income),
 					gap_absolute: Number(row.gap_absolute),
 					gap_relative_pct: Number(row.gap_relative_pct),
+					visible_minority_total_population_count: Number(row.visible_minority_total_population_count),
+					not_visible_minority_total_population_count: Number(row.not_visible_minority_total_population_count),
+					visible_minority_with_employment_income_count: Number(row.visible_minority_with_employment_income_count),
+					not_visible_minority_with_employment_income_count: Number(row.not_visible_minority_with_employment_income_count),
 				}));
 				renderControls();
 				render();
 			})
 			.catch(() => {
-				summary.textContent = 'La visualisation interactive ne peut pas être chargée pour le moment.';
+				summary.textContent = 'The interactive visualization cannot be loaded right now.';
 			});
 
 		ageSelect.addEventListener('change', render, { signal });
@@ -290,7 +546,8 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 		selectAll.addEventListener(
 			'click',
 			() => {
-				selected = new Set(rows.map((row) => row.education));
+				const educations = [...new Set(rows.map((row) => row.education))];
+				selected = selected.size === educations.length ? new Set() : new Set(educations);
 				renderControls();
 				render();
 			},

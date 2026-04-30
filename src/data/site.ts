@@ -166,7 +166,7 @@ const baseCopy = {
 			},
 			{
 				slug: 'developing-two-virtual-reality-environments-and-detecting-emotions',
-				featuredPosition: 2,
+				featuredPosition: 3,
 				categories: ['Featured', 'VR', 'AI'],
 				year: '2020',
 				title: 'Developing Two Virtual-Reality Environments and Detecting Emotions with AI',
@@ -286,7 +286,7 @@ const baseCopy = {
 			},
 			{
 				slug: 'tracking-sea-ice-movement-with-ai',
-				featuredPosition: 3,
+				featuredPosition: 9,
 				categories: ['Featured', 'AI'],
 				year: '2021',
 				title: 'Developing an AI Model for Tracking Sea-Ice Movement',
@@ -405,7 +405,7 @@ const baseCopy = {
 			},
 			{
 				slug: 'feedback-classification-codeml-hackathon',
-				featuredPosition: 4,
+				featuredPosition: 7,
 				categories: ['Featured', 'AI'],
 				year: '2020',
 				title: 'CodeML Hackathon: Developing AI Models to Classify Product Feedback',
@@ -518,7 +518,7 @@ const baseCopy = {
 			},
 			{
 				slug: 'designing-vr-simulation-mri-experience',
-				featuredPosition: 5,
+				featuredPosition: 2,
 				categories: ['Featured', 'VR'],
 				year: '2024-2025',
 				title: 'Designing a VR Simulation to Improve the MRI Experience',
@@ -640,7 +640,7 @@ const baseCopy = {
 			},
 			{
 				slug: 'match-3-puzzle-task-automated-generation',
-				featuredPosition: 6,
+				featuredPosition: 4,
 				categories: ['Featured', 'Experimental Tasks', 'Data Visualization'],
 				year: '2026',
 				title: 'Developing a Match-3 Puzzle Task and Automating Puzzle Generation',
@@ -775,140 +775,118 @@ const baseCopy = {
 			},
 			{
 				slug: 'revenu-femmes-minorites-visibles-quebec',
-				featuredPosition: 7,
+				featuredPosition: 5,
 				categories: ['Featured', 'Data Visualization'],
 				year: '2026',
-				title: 'À diplôme égal: explorer les écarts de revenu médian au Québec',
+				title: 'Equal diploma, unequal pay? Exploring median employment income in Quebec',
 				description:
-					'Un outil de data visualization interactif qui compare le revenu d’emploi médian des femmes issues ou non d’une minorité visible au Québec, à diplôme égal.',
+					'An interactive data visualization comparing the median employment income of women from visible minorities and women not from visible minorities in Quebec, by education level.',
 				discipline: 'Data Visualization, Social Data',
-				role: 'Data analyst, Python developer, visualization designer',
-				timeline: 'Exploratory analysis',
+				role: 'Lead Developer, Data Analyst',
+				timeline: '1 day',
 				visual: {
 					title: 'Income Explorer',
 					theme: 'light',
-					tags: ['Statistique Canada', 'Python', 'interactive data viz', 'Québec'],
+					tags: ['Statistics Canada', 'Python', 'interactive data viz', 'Quebec'],
 					media: [
 						{
 							type: 'image',
-							label: 'Graphique exploratoire généré en Python pour la tranche 25 à 54 ans',
-							src: '/projects/revenu-femmes-minorites-visibles/revenu-par-diplome-25-54.png',
-						},
-						{
-							type: 'image',
-							label: 'Écart relatif de revenu médian par diplôme pour la tranche 25 à 54 ans',
-							src: '/projects/revenu-femmes-minorites-visibles/ecart-relatif-25-54.png',
+							label: 'Median income landscape diagram',
+							src: '/projects/revenu-femmes-minorites-visibles/diagram-median-income-landscape.png',
 						},
 					],
 				},
 				caseStudy: {
-					kicker: 'Data Visualization / Python / Statistique Canada',
-					heroTitle: 'À diplôme égal, les femmes issues d’une minorité visible au Québec ont-elles un revenu d’emploi médian inférieur?',
+					kicker: 'Data Visualization / Python / Statistics Canada',
+					heroTitle: 'Do women from visible minorities in Quebec earn less, even with the same diploma?',
 					heroSubtitle:
-						'J’ai transformé une analyse Python en outil interactif pour répondre à une question sociale avec le plus de clarté possible: à niveau de diplôme comparable, observe-t-on un revenu d’emploi médian plus bas pour les femmes issues d’une minorité visible au Québec?',
+						'Inspired by Nael Shiab, I wanted to use public data to answer a question of general interest: when education level is comparable, do women from visible minorities earn less than women who are not from visible minorities?',
 					overview: [
 						{
 							label: 'My Role',
 							value:
-								'J’ai cadré la question, filtré les données de Statistique Canada avec Python, calculé les écarts absolus et relatifs, puis conçu une visualisation web interactive pour rendre les résultats lisibles sans surcharger la page de chiffres.',
+								'This was a personal project, so I did everything from the initial hypothesis to filtering Statistics Canada data with Python, calculating absolute and relative gaps, and designing an interactive web visualization that keeps the results readable without overloading the page with numbers. OpenAI helped me write the code faster.',
 						},
 						{
 							label: 'Technical Details',
 							value:
-								'Python, Pandas, Matplotlib, Astro, Vanilla JavaScript, SVG. Source: tableau Statistique Canada 98-10-0439-01, année de revenu 2020.',
+								'Data Processing: Python<br />Web Visualization: Vanilla JavaScript<br />Dataset: Statistics Canada table 98-10-0439-01, income year 2020.',
 						},
 						{
 							label: 'Timeline',
-							value: 'Exploratory analysis and portfolio visualization',
+							value: '1 day',
 						},
 					],
 					links: [
 						{
-							label: 'Statistique Canada table',
-							href: 'https://www150.statcan.gc.ca/n1/tbl/csv/98100439-eng.zip',
+							label: 'Statistics Canada table',
+							href: 'https://www150.statcan.gc.ca/t1/tbl1/fr/tv.action?pid=9810043901',
 						},
 					],
 					problem: {
 						title:
-							'La question est simple, mais les données brutes sont difficiles à lire directement.',
+							'At the same education level, do women from visible minorities in Quebec earn less money?',
 						description:
-							'Le tableau source contient plusieurs dimensions: géographie, âge, genre, année de revenu, statut d’immigration, diplôme, mesure de revenu et statut de minorité visible. Il fallait réduire ce volume à une comparaison juste et compréhensible.',
+							'The source table contains many dimensions: geography, age, gender, income year, immigration status, education level, income measure, and visible minority status. The challenge was turning a large table into a focused comparison that still kept the limits of the data visible.',
 						points: [
-							'Comparer à diplôme égal exige de garder les catégories de diplôme séparées.',
-							'La visualisation devait permettre de changer la tranche d’âge sans relire un tableau lourd.',
-							'Le résultat devait rester descriptif et transparent sur ses limites.',
+							'The visualization needed to be easy to use and quick to understand.',
+							'The result had to stay descriptive and transparent about what it does not control for.',
 						],
 					},
 					solution: {
 						title:
-							'Oui, dans la plupart des comparaisons retenues, le revenu médian observé est inférieur pour les femmes issues d’une minorité visible.',
+							'An interactive tool compares median employment incomes by education level, age group, and visible minority status.',
 						description:
-							'L’outil interactif montre que, pour les femmes au Québec en 2020, les écarts sont majoritairement négatifs dans les diplômes et tranches d’âge analysés. Quelques catégories font exception selon l’âge, ce qui rend l’exploration interactive utile.',
+							'The tool shows the median income for both groups first, then lets readers inspect the relative gaps and identify which diploma categories have the largest differences. The analysis uses 2020 income data for women in Quebec.',
 						points: [
-							'Les filtres permettent de choisir la tranche d’âge et les diplômes à comparer.',
-							'Le graphique d’écart relatif répond rapidement à la question principale.',
-							'Le graphique de revenus médians permet de voir les deux groupes côte à côte.',
+							'Filters let readers choose an age group and education levels.',
+							'The median-income view shows both groups side by side before interpreting the gap.',
+							'The gap views highlight where the difference is largest, while keeping the analysis descriptive.',
 						],
 					},
 					process: [
 						{
-							title: 'Question de recherche',
+							title: 'Load the public table',
 							body:
-								'J’ai formulé la question autour d’une comparaison à diplôme égal entre deux groupes statistiques: femmes issues d’une minorité visible et femmes non issues d’une minorité visible au Québec.',
+								'I used Statistics Canada table 98-10-0439-01 and kept the dimensions needed for the comparison: Quebec, Women+, income year 2020, median employment income, education level, age group, and visible minority status.',
 						},
 						{
-							title: 'Préparation des données',
+							title: 'Filter the population',
 							body:
-								'Le script Python filtre le tableau de Statistique Canada pour le Québec, les femmes, l’année de revenu 2020, le revenu d’emploi médian, et le statut combiné des immigrantes et non-immigrantes.',
+								'I selected the variables and filters to use: GEO = Quebec, Gender = Women+, Income year = 2020, Employment income statistics = Median employment income ($), Statistics = Count, and Immigrant status = Non-immigrants and Immigrants. This keeps the overall female population rather than splitting immigrants and non-immigrants.',
 						},
 						{
-							title: 'Comparaison',
+							title: 'Keep comparable education rows',
 							body:
-								'Pour chaque diplôme et tranche d’âge, le script calcule la différence entre les revenus médians et l’écart relatif. Un écart négatif indique un revenu médian inférieur pour les femmes issues d’une minorité visible.',
+								'I kept detailed diploma categories and excluded the aggregate row "Total - Highest certificate, diploma or degree." The analysis is repeated for several age groups, including 25 to 29, 30 to 34, 35 to 44, 45 to 54, 55 to 64, 25 to 54, and 25 to 64 years.',
 						},
 						{
-							title: 'Visualisation',
+							title: 'Compare the two groups',
 							body:
-								'J’ai converti les résultats agrégés en JSON léger pour le site et construit une visualisation SVG en JavaScript afin de permettre des changements de critères en direct.',
+								'For each education level and age group, I compared the median employment income of women from visible minorities with women not from visible minorities. I calculated the absolute gap and the relative gap as ((visible minority income / not visible minority income) - 1) * 100.',
 						},
 						{
-							title: 'Limites',
+							title: 'Export for the web',
 							body:
-								'Cette analyse décrit des écarts observés. Elle ne contrôle pas le domaine d’études, l’expérience, le secteur, le statut temps plein ou partiel, ni la reconnaissance des diplômes étrangers.',
+								'I exported the filtered and aggregated results as a lightweight JSON file, then built an SVG-based interactive visualization in Vanilla JavaScript so readers can change age groups and chart types directly on the page.',
+						},
+						{
+							title: 'Interpret with limits',
+							body:
+								'A negative gap means that women from visible minorities have a lower observed median income in that category. "Visible minority" follows the Employment Equity Act definition: persons, other than Aboriginal peoples, who are non-Caucasian in race or non-white in colour. This analysis shows observed gaps, but does not prove causality or direct discrimination. Comparing "at the same education level" does not control for factors such as field of study, experience, employment status, sector, job type, full-time or part-time work, or recognition of foreign credentials.',
 						},
 					],
-					challenges: [
-						{
-							title: 'Rendre le résultat lisible',
-							description:
-								'Le principal défi était de répondre clairement à la question sans transformer la page en tableau de chiffres.',
-						},
-						{
-							title: 'Garder la nuance',
-							description:
-								'La variable « minorité visible » est une catégorie statistique imparfaite et l’analyse reste descriptive.',
-						},
-						{
-							title: 'Publier les données proprement',
-							description:
-								'Le site utilise seulement un extrait agrégé en JSON, plutôt que le gros fichier source complet.',
-						},
-					],
+					challenges: [],
 					impact: [
 						{
 							title: 'Live',
 							description:
-								'visualisation interactive intégrée directement dans la page projet.',
+								'interactive visualization embedded directly in the project page.',
 						},
 						{
-							title: 'Clair',
+							title: 'Reproducible',
 							description:
-								'la page privilégie une lecture qualitative des écarts et garde les chiffres détaillés dans les graphiques.',
-						},
-						{
-							title: 'Reproductible',
-							description:
-								'la méthodologie suit le script Python existant et s’appuie sur des données agrégées exportées.',
+								'the method follows the existing Python processing steps and uses exported aggregate data.',
 						},
 					],
 				},
@@ -1046,7 +1024,7 @@ const baseCopy = {
 			},
 			{
 				slug: 'developing-spicytracks-mit-reality-hack-2025',
-				featuredPosition: 9,
+				featuredPosition: 6,
 				categories: ['Featured', 'VR', 'Fun&Games'],
 				year: '2025',
 				title: 'Developing SpicyTracks: A Musical Kitchen App in Mixed Reality',
