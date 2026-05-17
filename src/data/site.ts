@@ -37,7 +37,6 @@ const baseCopy = {
 		items: [
 			{
 				slug: 'developing-e-cog-learning-platform',
-				featuredPosition: 1,
 				categories: ['Featured', 'Web'],
 				year: '2026',
 				title: 'E-Cog Learning Platform for Healthcare Professionals',
@@ -166,7 +165,6 @@ const baseCopy = {
 			},
 			{
 				slug: 'developing-two-virtual-reality-environments-and-detecting-emotions',
-				featuredPosition: 3,
 				categories: ['Featured', 'VR', 'AI'],
 				year: '2020',
 				title: 'Developing Two Virtual-Reality Environments and Detecting Emotions with AI',
@@ -286,7 +284,6 @@ const baseCopy = {
 			},
 			{
 				slug: 'tracking-sea-ice-movement-with-ai',
-				featuredPosition: 9,
 				categories: ['Featured', 'AI'],
 				year: '2021',
 				title: 'Developing an AI Model for Tracking Sea-Ice Movement',
@@ -300,32 +297,30 @@ const baseCopy = {
 					theme: 'light',
 					tags: ['AI', 'machine learning', 'climate', 'sea ice'],
 					media: [
-					{ type: 'image', label: 'Flyer of the event, image from https://launchlab.ai/fr/climate/ (2026-04-20)', src: '/projects/climate-change-hackathon/flyer.png' },
-					// { type: 'image', label: 'Model comparison results', src: '/projects/sea-ice-ai/results.png' },
-					// { type: 'image', label: 'Feature correlation heatmap', src: '/projects/sea-ice-ai/heatmap.png' },
+						{ type: 'image', label: 'Flyer of the event, image from https://launchlab.ai/fr/climate/ (2026-04-20)', src: '/projects/climate-change-hackathon/flyer.png' },
 					],
 				},
 				caseStudy: {
 					kicker: 'AI',
 					heroTitle: 'Tracking Sea-Ice Movement with AI',
 					heroSubtitle:
-					'This Climate Crisis Hackathon challenge explored how AI could help predict Arctic sea-ice movement from wind fields and environmental data.',
+						'This Climate Crisis Hackathon challenge explored how AI could help predict Arctic sea-ice movement from wind fields and environmental data.',
 
 					overview: [
-					{
-						label: 'My Role',
-						value:
-						'I contributed to the machine learning pipeline, including problem reformulation, data visualization, preprocessing, feature exploration, model training, model comparison, and test-set prediction generation.',
-					},
-					{
-						label: 'Technical Details',
-						value:
-						'AI: Python, Scikit-learn. Dataset: Daily Arctic sea-ice drift observations, combining ice velocity with wind, sea-ice concentration, sea-ice thickness, position, date, and distance-to-coast features.',
-					},
-					{
-						label: 'Timeline',
-						value: '48h',
-					},
+						{
+							label: 'My Role',
+							value:
+								'I contributed to the machine learning pipeline, including problem reformulation, data visualization, preprocessing, feature exploration, model training, model comparison, and test-set prediction generation.',
+						},
+						{
+							label: 'Technical Details',
+							value:
+								'AI: Python, Scikit-learn. Dataset: Daily Arctic sea-ice drift observations, combining ice velocity with wind, sea-ice concentration, sea-ice thickness, position, date, and distance-to-coast features.',
+						},
+						{
+							label: 'Timeline',
+							value: '48h',
+						},
 					],
 					links: [
 						{
@@ -335,77 +330,76 @@ const baseCopy = {
 					],
 
 					problem: {
-					title:
-						'Arctic sea ice moves under the influence of wind and ocean currents, sometimes by several kilometers per day.',
-					description:
-						'Understanding this movement is important for climate research, navigation, marine operations, pollutant tracking, and studying the transition from older sea ice to younger seasonal ice.',
-					points: [
-						'Sea-ice motion is difficult to model because it depends on several environmental factors.',
-						'Reliable sea-ice velocity information is often obtained from drifting buoys.',
-						'The challenge was to reproduce buoy drift using wind fields and other relevant features.',
-					],
+						title:
+							'Arctic sea ice moves under the influence of wind and ocean currents, sometimes by several kilometers per day.',
+						description:
+							'Understanding this movement is important for climate research, navigation, marine operations, pollutant tracking, and studying the transition from older sea ice to younger seasonal ice.',
+						points: [
+							'Sea-ice motion is difficult to model because it depends on several environmental factors.',
+							'Reliable sea-ice velocity information is often obtained from drifting buoys.',
+							'The challenge was to reproduce buoy drift using wind fields and other relevant features.',
+						],
 					},
 
 					solution: {
-					title:
-						'As part of a multi-disciplinary team, I built and compared machine learning models to predict sea-ice velocity from environmental data.',
-					description:
-						'The model used features such as wind velocity, sea-ice concentration, sea-ice thickness, position, and distance to coast to predict the u and v components of buoy drift.',
-					points: [
-						''
-					],
+						title:
+							'As part of a multi-disciplinary team, I built and compared machine learning models to predict sea-ice velocity from environmental data.',
+						description:
+							'The model used features such as wind velocity, sea-ice concentration, sea-ice thickness, position, and distance to coast to predict the u and v components of buoy drift.',
+						points: [
+							''
+						],
 					},
 
 					process: [
-					{
-						title: 'Problem framing',
-						body:
-						'We started by reading the challenge guidelines and reformulating the task as a supervised regression problem: predicting sea-ice velocity components from wind and environmental variables.',
-					},
-					{
-						title: 'Data exploration',
-						body:
-						'We visualized the dataset and used correlation heatmaps to understand relationships between wind, ice, position, thickness, and buoy drift.',
-					},
-					{
-						title: 'Preprocessing',
-						body:
-						'We normalized the data with MinMaxScaler and tested PCA to make the features easier to compare and reduce dimensionality where useful.',
-					},
-					{
-						title: 'Baseline model',
-						body:
-						'We trained a simple linear regression model as a baseline, giving us an initial reference point with a validation MSE of about 25.',
-					},
-					{
-						title: 'Model comparison and tuning',
-						body:
-						'We trained and compared KNN, Ridge, Random Forest, and MLP with 5-fold cross-validation, then used GridSearch to tune key parameters such as KNN neighbors and Random Forest settings.',
-					},
+						{
+							title: 'Problem framing',
+							body:
+								'We started by reading the challenge guidelines and reformulating the task as a supervised regression problem: predicting sea-ice velocity components from wind and environmental variables.',
+						},
+						{
+							title: 'Data exploration',
+							body:
+								'We visualized the dataset and used correlation heatmaps to understand relationships between wind, ice, position, thickness, and buoy drift.',
+						},
+						{
+							title: 'Preprocessing',
+							body:
+								'We normalized the data with MinMaxScaler and tested PCA to make the features easier to compare and reduce dimensionality where useful.',
+						},
+						{
+							title: 'Baseline model',
+							body:
+								'We trained a simple linear regression model as a baseline, giving us an initial reference point with a validation MSE of about 25.',
+						},
+						{
+							title: 'Model comparison and tuning',
+							body:
+								'We trained and compared KNN, Ridge, Random Forest, and MLP with 5-fold cross-validation, then used GridSearch to tune key parameters such as KNN neighbors and Random Forest settings.',
+						},
 					],
 
 					impact: [
-					{
-						title: '15.9 MSE',
-						description:
-						'best validation result obtained with a Random Forest regressor using 5-fold cross-validation.',
-					},
-					{
-						title: 'Model comparison',
-						description:
-						'Random Forest outperformed the other tested models, followed by KNN and MLP.',
-					},
-					{
-						title: 'Climate AI',
-						description:
-						'The project showed how machine learning can be applied to climate-related data and environmental prediction problems.',
-					},
+						{
+							title: '15.9 MSE',
+							description:
+								'best validation result obtained with a Random Forest regressor using 5-fold cross-validation.',
+						},
+						{
+							title: 'Model comparison',
+							description:
+								'Random Forest outperformed the other tested models, followed by KNN and MLP.',
+						},
+						{
+							title: 'Climate AI',
+							description:
+								'The project showed how machine learning can be applied to climate-related data and environmental prediction problems.',
+						},
 					],
 				},
 			},
 			{
 				slug: 'feedback-classification-codeml-hackathon',
-				featuredPosition: 7,
 				categories: ['Featured', 'AI'],
 				year: '2020',
 				title: 'CodeML Hackathon: Developing AI Models to Classify Product Feedback',
@@ -518,7 +512,6 @@ const baseCopy = {
 			},
 			{
 				slug: 'designing-vr-simulation-mri-experience',
-				featuredPosition: 2,
 				categories: ['Featured', 'VR'],
 				year: '2024-2025',
 				title: 'Designing a VR Simulation to Improve the MRI Experience',
@@ -640,7 +633,6 @@ const baseCopy = {
 			},
 			{
 				slug: 'match-3-puzzle-task-automated-generation',
-				featuredPosition: 4,
 				categories: ['Featured', 'Experimental Tasks', 'Data Visualization'],
 				year: '2026',
 				title: 'Developing a Match-3 Puzzle Task and Automating Puzzle Generation',
@@ -775,8 +767,7 @@ const baseCopy = {
 			},
 			{
 				slug: 'revenu-femmes-minorites-visibles-quebec',
-				featuredPosition: 5,
-				categories: ['Featured', 'Data Visualization'],
+				categories: ['Data Visualization'],
 				year: '2026',
 				title: 'À diplôme égal, revenu inégal? Explorer le revenu d’emploi médian au Québec',
 				description:
@@ -893,7 +884,6 @@ const baseCopy = {
 			},
 			{
 				slug: 'design-poster-cyberstats-challenge-serene-risc-2019',
-				featuredPosition: 8,
 				categories: ['Featured', 'Data Visualization'],
 				year: '2019',
 				title: 'CyberStats Challenge 2019: Poster Highlighting Cybersecurity Issues',
@@ -1024,7 +1014,6 @@ const baseCopy = {
 			},
 			{
 				slug: 'developing-spicytracks-mit-reality-hack-2025',
-				featuredPosition: 6,
 				categories: ['Featured', 'VR', 'Fun&Games'],
 				year: '2025',
 				title: 'Developing SpicyTracks: A Musical Kitchen App in Mixed Reality',
