@@ -1153,7 +1153,7 @@ const baseCopy = {
 		],
 	},
 	testimonial: {
-		heading: 'Apparently, I am\nfun to work with!',
+		heading: 'I am fun\nto work with!',
 		body:
 			"<i>C. was our first point of contact for client support. Throughout her mandate, she delivered high-quality work. She demonstrated rigor, reliability, and great efficiency in carrying out her various responsibilities. I would not hesitate to entrust her with another mandate in an equivalent or higher-level position in the future. Annie Legault, Administrative Services Manager, Residences de l'Université de Montréal.</i>",
 	},
