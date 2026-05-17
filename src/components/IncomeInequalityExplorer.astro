@@ -4,28 +4,28 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 
 <section class="income-explorer" data-income-explorer data-src={dataSrc} aria-labelledby="income-explorer-title">
 	<div class="income-explorer-header">
-		<p class="case-kicker">Interactive visualization</p>
-		<h2 id="income-explorer-title">Explore income gaps by diploma</h2>
+		<p class="case-kicker">Visualisation interactive</p>
+		<h2 id="income-explorer-title">Explorer les écarts de revenu par diplôme</h2>
 		<p>
-			Choose an age group and a few education levels. Start with median incomes, then inspect where the observed
-			gaps are largest for women from visible minorities in Quebec.
+			Choisissez un groupe d’âge et quelques niveaux d’études. Commencez avec les revenus médians, puis examinez
+			où les écarts observés sont les plus grands pour les femmes issues d’une minorité visible au Québec.
 		</p>
 	</div>
 
-	<div class="income-controls" aria-label="Visualization filters">
+	<div class="income-controls" aria-label="Filtres de visualisation">
 		<label>
-			<span>Age group</span>
+			<span>Groupe d’âge</span>
 			<select data-income-age></select>
 		</label>
 		<label>
-			<span>Chart type</span>
+			<span>Type de graphique</span>
 			<select data-income-view>
-				<option value="income">Median incomes</option>
-				<option value="landscape">Income landscape</option>
-				<option value="gap">Relative gap</option>
-				<option value="scatter">Largest gaps</option>
-				<option value="donut">Gap breakdown</option>
-				<option value="sample">Sample size</option>
+				<option value="income">Revenus médians</option>
+				<option value="landscape">Paysage des revenus</option>
+				<option value="gap">Écart relatif</option>
+				<option value="scatter">Plus grands écarts</option>
+				<option value="donut">Répartition des écarts</option>
+				<option value="sample">Effectifs</option>
 			</select>
 		</label>
 	</div>
@@ -35,10 +35,10 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 	<div class="income-layout">
 		<div class="income-education-panel">
 			<div class="income-panel-top">
-				<p>Education levels</p>
+				<p>Niveaux d’études</p>
 				<div>
-					<button type="button" data-income-select-all>All</button>
-					<button type="button" data-income-select-key>Summary</button>
+					<button type="button" data-income-select-all>Tout</button>
+					<button type="button" data-income-select-key>Résumé</button>
 				</div>
 			</div>
 			<div class="income-education-list" data-income-education-list></div>
@@ -46,8 +46,8 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 
 		<div class="income-chart-wrap">
 			<svg class="income-chart" data-income-chart role="img" aria-labelledby="income-chart-title income-chart-desc">
-				<title id="income-chart-title">Median employment income by education level</title>
-				<desc id="income-chart-desc">Interactive chart based on the selected filters.</desc>
+				<title id="income-chart-title">Revenu d’emploi médian par niveau d’études</title>
+				<desc id="income-chart-desc">Graphique interactif basé sur les filtres sélectionnés.</desc>
 			</svg>
 			<div class="income-tooltip" data-income-tooltip hidden></div>
 		</div>
@@ -57,9 +57,9 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 		<p class="case-kicker">Source</p>
 		<div>
 			<p>
-				Source: <a href="https://www150.statcan.gc.ca/t1/tbl1/fr/tv.action?pid=9810043901" target="_blank">Statistics Canada table 98-10-0439-01</a>,
-				income year 2020. The analysis keeps Quebec, Women+, median employment income, and the combined
-				immigration status "Non-immigrants and Immigrants."
+				Source: <a href="https://www150.statcan.gc.ca/t1/tbl1/fr/tv.action?pid=9810043901" target="_blank">tableau Statistique Canada 98-10-0439-01</a>,
+				année de revenu 2020. L’analyse garde le Québec, les femmes (Women+), le revenu d’emploi médian et le statut
+				d’immigration combiné "Non-immigrants and Immigrants."
 			</p>
 		</div>
 	</div>
@@ -94,50 +94,51 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 
 		const shortEducation = (label) => {
 			const labels = {
-				'No certificate, diploma or degree': 'No diploma',
-				'High (secondary) school diploma or equivalency certificate': 'High school',
-				'Apprenticeship certificate': 'Apprenticeship',
-				'Non-apprenticeship trades certificate or diploma': 'Trades, non-apprenticeship',
-				'Apprenticeship or trades certificate or diploma': 'Trades',
-				'College, CEGEP or other non-university certificate or diploma': 'College / CEGEP',
-				'University certificate or diploma below bachelor level': 'University cert. below BA',
-				'Postsecondary certificate or diploma below bachelor level': 'Postsecondary below BA',
-				"Bachelor's degree": "Bachelor's",
-				'Bachelor’s degree or higher': "Bachelor's or higher",
-				'Bachelorâ€™s degree or higher': "Bachelor's or higher",
-				'University certificate or diploma above bachelor level': 'University cert. above BA',
-				"Master's degree": "Master's",
-				'Degree in medicine, dentistry, veterinary medicine or optometry': 'Medicine, dentistry, veterinary or optometry',
-				'Earned doctorate': 'Doctorate',
-				'Postsecondary certificate, diploma or degree': 'Postsecondary',
+				'No certificate, diploma or degree': 'Aucun diplôme',
+				'High (secondary) school diploma or equivalency certificate': 'Secondaire',
+				'Apprenticeship certificate': 'Apprentissage',
+				'Non-apprenticeship trades certificate or diploma': 'Métiers, hors apprentissage',
+				'Apprenticeship or trades certificate or diploma': 'Métiers',
+				'College, CEGEP or other non-university certificate or diploma': 'Collège / Cégep',
+				'University certificate or diploma below bachelor level': 'Certificat univ. sous le bac',
+				'Postsecondary certificate or diploma below bachelor level': 'Postsecondaire sous le bac',
+				"Bachelor's degree": 'Baccalauréat',
+				'Bachelor’s degree or higher': 'Baccalauréat ou plus',
+				'Bachelorâ€™s degree or higher': 'Baccalauréat ou plus',
+				'University certificate or diploma above bachelor level': 'Certificat univ. au-dessus du bac',
+				"Master's degree": 'Maîtrise',
+				'Degree in medicine, dentistry, veterinary medicine or optometry': 'Médecine, dentisterie, médecine vétérinaire ou optométrie',
+				'Earned doctorate': 'Doctorat',
+				'Postsecondary certificate, diploma or degree': 'Postsecondaire',
 			};
 			return labels[label] ?? label;
 		};
 
 		const money = (value) =>
-			new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(value);
-		const count = (value) => new Intl.NumberFormat('en-CA', { maximumFractionDigits: 0 }).format(value ?? 0);
-		const pct = (value) => `${value > 0 ? '+' : ''}${value.toFixed(1)}%`;
+			new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(value);
+		const count = (value) => new Intl.NumberFormat('fr-CA', { maximumFractionDigits: 0 }).format(value ?? 0);
+		const pct = (value) => `${value > 0 ? '+' : ''}${value.toFixed(1).replace('.', ',')} %`;
+		const ageLabel = (age) => age.replaceAll('to', 'à').replaceAll('years', 'ans').replace('year', 'an');
 		const countNote = (row) => {
 			const minCount = Math.min(row.visible_minority_with_employment_income_count ?? Infinity, row.not_visible_minority_with_employment_income_count ?? Infinity);
-			return minCount < 500 ? '<br><em>Small group: interpret carefully.</em>' : '';
+			return minCount < 500 ? '<br><em>Petit groupe: interpréter avec prudence.</em>' : '';
 		};
 		const gapTooltip = (row) => `
 			<strong>${shortEducation(row.education)}</strong><br>
-			Women from visible minorities: ${money(row.visible_minority_income)}<br>
-			Women not from visible minorities: ${money(row.not_visible_minority_income)}<br>
-			Gap: ${money(row.gap_absolute)} (${pct(row.gap_relative_pct)})<br>
-			Women included in median income: ${count(row.visible_minority_with_employment_income_count)} vs ${count(row.not_visible_minority_with_employment_income_count)}
+			Femmes issues d’une minorité visible: ${money(row.visible_minority_income)}<br>
+			Femmes non issues d’une minorité visible: ${money(row.not_visible_minority_income)}<br>
+			Écart: ${money(row.gap_absolute)} (${pct(row.gap_relative_pct)})<br>
+			Femmes incluses dans le revenu médian: ${count(row.visible_minority_with_employment_income_count)} contre ${count(row.not_visible_minority_with_employment_income_count)}
 			${countNote(row)}
 		`;
 
 		const renderControls = () => {
 			const ages = [...new Set(rows.map((row) => row.age_group))];
-			ageSelect.innerHTML = ages.map((age) => `<option value="${age}">${age}</option>`).join('');
+			ageSelect.innerHTML = ages.map((age) => `<option value="${age}">${ageLabel(age)}</option>`).join('');
 			ageSelect.value = ages.includes('25 to 54 years') ? '25 to 54 years' : ages[0];
 
 			const educations = [...new Set(rows.map((row) => row.education))];
-			selectAll.textContent = selected.size === educations.length ? 'Clear' : 'All';
+			selectAll.textContent = selected.size === educations.length ? 'Effacer' : 'Tout';
 			educationList.innerHTML = educations
 				.map(
 					(education) => `
@@ -220,12 +221,12 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 			if (!filtered.length) {
 				summary.innerHTML = `
 					<strong>0/0</strong>
-					<span>Select at least one education level to display the chart.</span>
+					<span>Sélectionnez au moins un niveau d’études pour afficher le graphique.</span>
 				`;
 				chart.innerHTML = '';
 				chart.setAttribute('viewBox', '0 0 960 260');
 				const emptyTitle = svgEl('text', { x: 230, y: 130, class: 'income-chart-title' });
-				emptyTitle.textContent = 'No education level selected';
+				emptyTitle.textContent = 'Aucun niveau d’études sélectionné';
 				chart.append(emptyTitle);
 				return;
 			}
@@ -234,7 +235,7 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 			const strongest = [...filtered].sort((a, b) => a.gap_relative_pct - b.gap_relative_pct)[0];
 			summary.innerHTML = `
 				<strong>${negativeCount}/${filtered.length}</strong>
-				<span>In this selection, ${negativeCount} education level${negativeCount === 1 ? '' : 's'} show a lower median income for women from visible minorities. The largest relative gap here is for <em>${shortEducation(strongest.education)}</em>.</span>
+				<span>Dans cette sélection, ${negativeCount} niveau${negativeCount === 1 ? '' : 'x'} d’études affichent un revenu médian plus bas pour les femmes issues d’une minorité visible. Le plus grand écart relatif ici concerne <em>${shortEducation(strongest.education)}</em>.</span>
 			`;
 
 			chart.innerHTML = '';
@@ -253,16 +254,16 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 			const title = svgEl('text', { x: margin.left, y: 20, class: 'income-chart-title' });
 			title.textContent =
 				view === 'gap'
-					? 'Relative gap by education level'
+					? 'Écart relatif par niveau d’études'
 					: view === 'scatter'
-						? 'Where are the largest gaps?'
+						? 'Où sont les plus grands écarts?'
 						: view === 'donut'
-							? 'Gap breakdown by education level'
+							? 'Répartition des écarts par niveau d’études'
 							: view === 'landscape'
-								? 'Median income landscape'
+								? 'Paysage des revenus médians'
 								: view === 'sample'
-									? 'Women with employment income'
-									: 'Median employment income by group';
+									? 'Femmes avec revenu d’emploi'
+									: 'Revenu d’emploi médian par groupe';
 			chart.append(title);
 
 			if (view === 'gap') {
@@ -308,8 +309,8 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 					chart.append(label);
 
 					[
-						['Women from visible minorities', row.visible_minority_income, 'income-bar-visible', 0],
-						['Women not from visible minorities', row.not_visible_minority_income, 'income-bar-reference', 22],
+						['Femmes issues d’une minorité visible', row.visible_minority_income, 'income-bar-visible', 0],
+						['Femmes non issues d’une minorité visible', row.not_visible_minority_income, 'income-bar-reference', 22],
 					].forEach(([group, value, className, offset]) => {
 						const bar = svgEl('rect', {
 							x: margin.left,
@@ -333,8 +334,8 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 					chart.append(label);
 
 					[
-						['Women from visible minorities with employment income', row.visible_minority_with_employment_income_count, 'income-bar-visible', 0],
-						['Women not from visible minorities with employment income', row.not_visible_minority_with_employment_income_count, 'income-bar-reference', 22],
+						['Femmes issues d’une minorité visible avec revenu d’emploi', row.visible_minority_with_employment_income_count, 'income-bar-visible', 0],
+						['Femmes non issues d’une minorité visible avec revenu d’emploi', row.not_visible_minority_with_employment_income_count, 'income-bar-reference', 22],
 					].forEach(([group, value, className, offset]) => {
 						const numericValue = Number(value ?? 0);
 						const bar = svgEl('rect', {
@@ -345,7 +346,7 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 							rx: 3,
 							class: className,
 						});
-						bar.addEventListener('pointermove', (event) => showTooltip(event, `<strong>${shortEducation(row.education)}</strong><br>${group}: ${count(numericValue)}<br>Median income gap: ${money(row.gap_absolute)} (${pct(row.gap_relative_pct)})${countNote(row)}`), { signal });
+						bar.addEventListener('pointermove', (event) => showTooltip(event, `<strong>${shortEducation(row.education)}</strong><br>${group}: ${count(numericValue)}<br>Écart de revenu médian: ${money(row.gap_absolute)} (${pct(row.gap_relative_pct)})${countNote(row)}`), { signal });
 						bar.addEventListener('pointerleave', hideTooltip, { signal });
 						chart.append(bar);
 
@@ -374,10 +375,10 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 				}
 				chart.append(svgEl('line', { x1: margin.left, y1: height - margin.bottom, x2: width - margin.right, y2: margin.top, class: 'income-equality-line' }));
 				const equalityNote = svgEl('text', { x: width - margin.right - 18, y: margin.top + 34, class: 'income-equality-label', 'text-anchor': 'end' });
-				equalityNote.textContent = 'Diagonal line = equal median income';
+				equalityNote.textContent = 'Ligne diagonale = revenu médian égal';
 				chart.append(equalityNote);
 				const belowNote = svgEl('text', { x: margin.left + 18, y: margin.top + 60, class: 'income-equality-label' });
-				belowNote.textContent = 'Below the line: lower income for women from visible minorities';
+				belowNote.textContent = 'Sous la ligne: revenu plus bas pour les femmes issues d’une minorité visible';
 				chart.append(belowNote);
 
 				filtered.forEach((row) => {
@@ -402,10 +403,10 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 				});
 
 				const xLabel = svgEl('text', { x: margin.left + plotWidth / 2, y: height - 22, class: 'income-legend' });
-				xLabel.textContent = 'Median income: women not from visible minorities';
+				xLabel.textContent = 'Revenu médian: femmes non issues d’une minorité visible';
 				chart.append(xLabel);
 				const yLabel = svgEl('text', { x: 20, y: margin.top + plotHeight / 2, class: 'income-legend', transform: `rotate(-90 20 ${margin.top + plotHeight / 2})` });
-				yLabel.textContent = 'Median income: women from visible minorities';
+				yLabel.textContent = 'Revenu médian: femmes issues d’une minorité visible';
 				chart.append(yLabel);
 			} else if (view === 'landscape') {
 				const sorted = [...filtered].sort((a, b) => a.not_visible_minority_income - b.not_visible_minority_income);
@@ -446,10 +447,10 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 				});
 
 				const legendA = svgEl('text', { x: margin.left + 18, y: margin.top + 28, class: 'income-landscape-label-visible' });
-				legendA.textContent = 'Women from visible minorities';
+				legendA.textContent = 'Femmes issues d’une minorité visible';
 				chart.append(legendA);
 				const legendB = svgEl('text', { x: margin.left + 18, y: margin.top + 54, class: 'income-landscape-label-reference' });
-				legendB.textContent = 'Women not from visible minorities';
+				legendB.textContent = 'Femmes non issues d’une minorité visible';
 				chart.append(legendB);
 			} else {
 				const sorted = [...filtered].sort((a, b) => Math.abs(b.gap_absolute) - Math.abs(a.gap_absolute));
@@ -493,30 +494,30 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 				centerTitle.textContent = `${negativeCount}/${filtered.length}`;
 				chart.append(centerTitle);
 				const centerSubtitle = svgEl('text', { x: centerX, y: centerY + 22, class: 'income-donut-subtitle' });
-				centerSubtitle.textContent = 'lower incomes';
+				centerSubtitle.textContent = 'revenus plus bas';
 				chart.append(centerSubtitle);
 
 				const note = svgEl('text', { x: 690, y: 160, class: 'income-legend' });
-				note.textContent = 'Segment size = absolute income gap';
+				note.textContent = 'Taille du segment = écart absolu de revenu';
 				chart.append(note);
 				const note2 = svgEl('text', { x: 690, y: 186, class: 'income-legend' });
-				note2.textContent = 'Hover to see both groups and the gap';
+				note2.textContent = 'Survolez pour voir les deux groupes et l’écart';
 				chart.append(note2);
 			}
 
 			const legend = svgEl('text', { x: margin.left, y: height - 18, class: 'income-legend' });
 			legend.textContent =
 				view === 'gap'
-					? 'Left of zero: lower median income for women from visible minorities.'
+					? 'À gauche de zéro: revenu médian plus bas pour les femmes issues d’une minorité visible.'
 					: view === 'scatter'
-						? 'Each bubble is an education level. Larger bubbles show larger absolute gaps; the diagonal marks equal incomes.'
+						? 'Chaque bulle est un niveau d’études. Les plus grosses bulles indiquent de plus grands écarts absolus; la diagonale marque des revenus égaux.'
 					: view === 'donut'
-							? 'Each ring segment is an education level. Larger segments mean larger dollar gaps.'
+							? 'Chaque segment de l’anneau est un niveau d’études. Les segments plus grands indiquent de plus grands écarts en dollars.'
 							: view === 'landscape'
-								? 'Layered areas trace both groups across selected education levels, sorted by reference-group income.'
+								? 'Les surfaces superposées tracent les deux groupes à travers les niveaux d’études sélectionnés, triés selon le revenu du groupe de référence.'
 								: view === 'sample'
-									? 'Counts show how many women are behind each comparison.'
-									: 'Purple: women from visible minorities. Black: women not from visible minorities.';
+									? 'Les effectifs montrent combien de femmes sont derrière chaque comparaison.'
+									: 'Violet: femmes issues d’une minorité visible. Noir: femmes non issues d’une minorité visible.';
 			chart.append(legend);
 		};
 
@@ -538,7 +539,7 @@ const dataSrc = '/projects/revenu-femmes-minorites-visibles/revenu-quebec-femmes
 				render();
 			})
 			.catch(() => {
-				summary.textContent = 'The interactive visualization cannot be loaded right now.';
+				summary.textContent = 'La visualisation interactive ne peut pas être chargée pour le moment.';
 			});
 
 		ageSelect.addEventListener('change', render, { signal });
